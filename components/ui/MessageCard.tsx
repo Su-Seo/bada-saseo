@@ -33,6 +33,18 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
     setReported(true);
   };
 
+  const [copied, setCopied] = useState(false);
+  const handleShare = async () => {
+    const url = `${window.location.origin}/letter/${id}`;
+    if (navigator.share) {
+      await navigator.share({ title: "바다사서", text: content.slice(0, 80), url });
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -72,7 +84,16 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
           <span>{currentHearts}</span>
         </button>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          {/* 공유 버튼 */}
+          <button
+            onClick={handleShare}
+            className="text-xs text-white/40 hover:text-white/70 transition-colors"
+            aria-label="공유"
+          >
+            {copied ? "복사됨 ✓" : "공유"}
+          </button>
+
           {/* 신고 버튼 */}
           {!reported ? (
             <button
@@ -85,7 +106,6 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
           ) : (
             <span className="text-xs text-white/30">신고 완료</span>
           )}
-
         </div>
       </div>
     </motion.div>
