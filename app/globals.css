@@ -585,3 +585,8 @@
     11% 18%, 13% 20%, 9% 15%, 12% 22%, 10% 17%, 11% 19%, 8% 16%, 13% 21%,
     9% 14%, 10% 18%, 8% 13%, 11% 17%;
 }
+
+@keyframes cloud-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-220vw); }
+}

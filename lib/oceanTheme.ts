@@ -55,51 +55,68 @@ const DAWN: OceanTheme = {
 };
 
 const MORNING: OceanTheme = {
-  skyTop: [32, 115, 198],
-  skyBottom: [82, 162, 224],
-  horizon: [108, 186, 234],
-  oceanTop: [12, 118, 172],   // 더 청량한 청록
+  skyTop: [52, 135, 210],
+  skyBottom: [105, 182, 235],
+  horizon: [182, 218, 242],   // 밝고 안개낀 수평선
+  oceanTop: [12, 118, 172],
   oceanBottom: [6, 70, 130],
-  wetSand: [42, 125, 158],    // 얕은 물 느낌의 밝은 청록
-  sandLight: [195, 178, 142], // 밝고 하얀 모래
+  wetSand: [42, 125, 158],
+  sandLight: [195, 178, 142],
   sandDark: [222, 205, 162],
   starOpacity: 0,
   moonOpacity: 0,
   moonGlowOpacity: 0,
-  horizonGlowOpacity: 0.06,
+  horizonGlowOpacity: 0.18,
   sunOpacity: 0.88,
 };
 
 const NOON: OceanTheme = {
-  skyTop: [8, 85, 190],
-  skyBottom: [48, 140, 212],
-  horizon: [78, 170, 228],
-  oceanTop: [8, 128, 192],    // 맑고 선명한 터콰이즈
-  oceanBottom: [4, 72, 138],  // 깊고 투명한 딥블루
-  wetSand: [38, 138, 172],    // 얕은 바닷물 청록
-  sandLight: [210, 194, 155], // 밝고 깨끗한 백사장
+  skyTop: [68, 152, 224],
+  skyBottom: [108, 188, 238],
+  horizon: [192, 224, 246],   // 밝고 선명한 수평선
+  oceanTop: [8, 128, 192],
+  oceanBottom: [4, 72, 138],
+  wetSand: [38, 138, 172],
+  sandLight: [210, 194, 155],
   sandDark: [232, 215, 172],
   starOpacity: 0,
   moonOpacity: 0,
   moonGlowOpacity: 0,
-  horizonGlowOpacity: 0.04,
+  horizonGlowOpacity: 0.15,
   sunOpacity: 1,
 };
 
+// 황금빛 노을 시작 — 하늘은 아직 파랗고 수평선만 따뜻해짐
+const GOLDEN_HOUR: OceanTheme = {
+  skyTop: [32, 122, 205],
+  skyBottom: [218, 145, 88],
+  horizon: [238, 168, 88],
+  oceanTop: [22, 90, 145],
+  oceanBottom: [10, 55, 105],
+  wetSand: [34, 98, 130],
+  sandLight: [198, 175, 130],
+  sandDark: [220, 195, 148],
+  starOpacity: 0,
+  moonOpacity: 0,
+  moonGlowOpacity: 0,
+  horizonGlowOpacity: 0.18,
+  sunOpacity: 0.75,
+};
+
 const SUNSET: OceanTheme = {
-  skyTop: [22, 30, 68],
-  skyBottom: [160, 75, 58],
-  horizon: [232, 145, 68],
+  skyTop: [62, 78, 148],
+  skyBottom: [188, 105, 72],
+  horizon: [235, 148, 68],
   oceanTop: [32, 58, 88],
   oceanBottom: [18, 38, 60],
   wetSand: [28, 45, 55],
   sandLight: [108, 85, 55],
   sandDark: [178, 148, 102],
-  starOpacity: 0.08,
-  moonOpacity: 0.08,
+  starOpacity: 0.05,
+  moonOpacity: 0.05,
   moonGlowOpacity: 0.01,
-  horizonGlowOpacity: 0.3,
-  sunOpacity: 0.4,
+  horizonGlowOpacity: 0.32,
+  sunOpacity: 0.35,
 };
 
 const DUSK: OceanTheme = {
@@ -120,18 +137,18 @@ const DUSK: OceanTheme = {
 
 // NOON과 SUNSET 사이: 오후까지 맑은 낮 하늘 유지
 const AFTERNOON: OceanTheme = {
-  skyTop: [10, 88, 188],
-  skyBottom: [52, 145, 215],
-  horizon: [82, 172, 228],
-  oceanTop: [10, 122, 182],   // 오후에도 청량함 유지
+  skyTop: [62, 142, 218],
+  skyBottom: [102, 178, 232],
+  horizon: [188, 222, 244],   // 오후 수평선도 밝고 선명하게
+  oceanTop: [10, 122, 182],
   oceanBottom: [5, 68, 132],
-  wetSand: [40, 132, 165],    // 얕은 물 청록
-  sandLight: [205, 188, 150], // 햇살 받은 밝은 모래
+  wetSand: [40, 132, 165],
+  sandLight: [205, 188, 150],
   sandDark: [228, 210, 168],
   starOpacity: 0,
   moonOpacity: 0,
   moonGlowOpacity: 0,
-  horizonGlowOpacity: 0.04,
+  horizonGlowOpacity: 0.15,
   sunOpacity: 0.95,
 };
 
@@ -142,8 +159,9 @@ const KEYFRAMES: { hour: number; theme: OceanTheme }[] = [
   { hour: 8, theme: MORNING },
   { hour: 12, theme: NOON },
   { hour: 15.5, theme: AFTERNOON },
-  { hour: 18.5, theme: SUNSET },
-  { hour: 20.5, theme: DUSK },
+  { hour: 17.5, theme: GOLDEN_HOUR },
+  { hour: 19.5, theme: SUNSET },
+  { hour: 21.5, theme: DUSK },
   { hour: 24, theme: MIDNIGHT }, // wrap
 ];
 

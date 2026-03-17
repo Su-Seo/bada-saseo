@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { OceanTheme } from "@/lib/oceanTheme";
 import { getMoonlightColor } from "@/lib/oceanTheme";
 import type { Star } from "./hooks/useStars";
@@ -11,7 +12,76 @@ interface Props {
   sunPos: { x: number; y: number } | null;
 }
 
+// ── 구름 생성 ─────────────────────────────────────────
+
+interface Bump { x: number; y: number; w: number; h: number }
+interface CloudData {
+  id: number;
+  top: number;
+  duration: number;
+  delay: number;
+  W: number;
+  H: number;
+  bumps: Bump[];
+  opacity: number;
+  blur: number;
+}
+
+function genClouds(count: number): CloudData[] {
+  return Array.from({ length: count }, (_, i) => {
+    const size     = 0.42 + Math.random() * 0.72;    // 0.42 ~ 1.14
+    const W        = Math.round(115 * size);          // 48 ~ 132 px
+    const H        = Math.round(38 * size);
+    const top      = 14 + Math.random() * 18;
+    const duration = 420 + Math.random() * 180;
+    const screenLeft = 4 + Math.random() * 88;
+    const delay    = -((110 - screenLeft) / 220) * duration;
+    const opacity  = 0.48 + Math.random() * 0.22;    // 0.48 ~ 0.70
+    const blur     = 4 + Math.random() * 5;           // 4 ~ 9 px
+
+    // 봉긋한 원형 덩어리들
+    const n = 3 + Math.floor(Math.random() * 3);      // 3 ~ 5
+    const bumps: Bump[] = [];
+    for (let b = 0; b < n; b++) {
+      const t = n === 1 ? 0.5 : b / (n - 1);
+      const bh = H * (0.48 + Math.random() * 0.38);
+      const bw = bh * (0.88 + Math.random() * 0.52);
+      const bx = W * 0.04 + t * W * 0.75 - bw / 2 + (Math.random() - 0.5) * W * 0.1;
+      const by = H * 0.52 - bh * 0.72;
+      bumps.push({ x: bx, y: by, w: bw, h: bh });
+    }
+
+    return { id: i, top, duration, delay, W, H, bumps, opacity, blur };
+  });
+}
+
+function CloudShape({ cloud }: { cloud: CloudData }) {
+  const { W, H, bumps, opacity, blur } = cloud;
+  return (
+    <div style={{ position: "relative", width: W, height: H, filter: `blur(${blur}px)`, opacity }}>
+      {/* 바닥 몸체 */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        height: H * 0.48, background: "white", borderRadius: H * 0.24,
+      }} />
+      {/* 봉긋한 위쪽 */}
+      {bumps.map((b, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: b.x, top: b.y, width: b.w, height: b.h,
+          borderRadius: "50%", background: "white",
+        }} />
+      ))}
+    </div>
+  );
+}
+
+// ── 컴포넌트 ──────────────────────────────────────────
+
 export default function OceanSky({ theme, stars, sunPos }: Props) {
+  // 마운트 시 1회만 생성 — 페이지 리로드마다 다른 구름
+  const clouds = useMemo(() => genClouds(6), []);
+
   return (
     <>
       {/* ── 별 ── */}
@@ -66,6 +136,35 @@ export default function OceanSky({ theme, stars, sunPos }: Props) {
           />
         </>
       )}
+
+      {/* ── 구름 (낮에만) ── */}
+      <div
+        className="absolute pointer-events-none overflow-hidden"
+        style={{
+          inset: 0,
+          height: `${HORIZON_PCT * 100}%`,
+          opacity: Math.min(1, Math.max(0, (theme.sunOpacity - 0.45) * 2.2)),
+          transition: "opacity 3s ease",
+        }}
+      >
+        {clouds.map((cloud) => (
+          <div
+            key={cloud.id}
+            className="absolute"
+            style={{
+              top: `${cloud.top}%`,
+              left: "110%",
+              animationName: "cloud-drift",
+              animationDuration: `${cloud.duration}s`,
+              animationDelay: `${cloud.delay}s`,
+              animationTimingFunction: "linear",
+              animationIterationCount: "infinite",
+            }}
+          >
+            <CloudShape cloud={cloud} />
+          </div>
+        ))}
+      </div>
 
       {/* ── 태양 ── */}
       {sunPos && (
