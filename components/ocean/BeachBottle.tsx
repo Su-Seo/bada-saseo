@@ -140,21 +140,6 @@ export default function BeachBottle({
             </span>
           </div>
 
-          <AnimatePresence>
-            {state === "filled" && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0.35, 0.75, 0.35] }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 2.5, repeat: Infinity }}
-                className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-white/50 pointer-events-none"
-                style={{ fontSize: "0.42rem", letterSpacing: "0.06em" }}
-              >
-                끌어서 바다로 ↑
-              </motion.p>
-            )}
-          </AnimatePresence>
-
           {/* ── 인라인 글쓰기 카드 ── */}
           <AnimatePresence>
             {state === "writing" && (

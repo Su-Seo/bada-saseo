@@ -25,6 +25,18 @@ export default function OceanScene() {
   const [throwOpen, setThrowOpen] = useState(false);
   const [pickMessageId, setPickMessageId] = useState<string | null>(null);
 
+  const isDaytime = theme.sunOpacity > 0.5;
+  // 낮/밤 텍스트 색상 — 낮은 밝은 배경이라 opacity를 높여서 가시성 확보
+  const txt = {
+    faint:  isDaytime ? "text-white/70"  : "text-white/25",
+    dim:    isDaytime ? "text-white/80"  : "text-white/40",
+    mid:    isDaytime ? "text-white/90"  : "text-white/60",
+    bright: isDaytime ? "text-white"     : "text-white/90",
+    btn:    isDaytime ? "text-white/70 hover:text-white" : "text-white/30 hover:text-white/60",
+    btnActive: isDaytime ? "bg-black/20 text-white" : "bg-white/20 text-white/90",
+    btnBase:   isDaytime ? "hover:bg-black/10 hover:bg-black/15" : "hover:text-white/60 hover:bg-white/8",
+  };
+
   const handleBottleClick = useCallback(
     ({ messageId, bottleId }: { messageId: string; bottleId: string }) => {
       removeBottle(bottleId);
@@ -76,14 +88,18 @@ export default function OceanScene() {
 
       {/* ── UI: 던지기 버튼 ── */}
       <button
-        className="fixed right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1.5 py-3 px-2.5 rounded-2xl bg-white/8 backdrop-blur-sm border border-white/15 text-white/60 hover:bg-white/15 hover:text-white/90 transition-all active:scale-95"
+        className={`fixed right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1.5 py-3 px-2.5 rounded-2xl backdrop-blur-sm border transition-all active:scale-95 ${
+          isDaytime
+            ? "bg-black/15 border-black/3 text-white/90 hover:bg-black/25"
+            : "bg-white/8 border-white/15 text-white/60 hover:bg-white/15 hover:text-white/90"
+        }`}
         onClick={() => setThrowOpen(true)}
         aria-label="고민 던지기"
         title="고민 던지기"
       >
         <GlassBottle size={1.4} />
         <span
-          className="text-white/50 tracking-wider"
+          className={isDaytime ? "text-white/90 tracking-wider" : "text-white/50 tracking-wider"}
           style={{ fontSize: "0.55rem", writingMode: "vertical-rl" }}
         >
           던지기
@@ -93,7 +109,7 @@ export default function OceanScene() {
       {/* ── UI: 타이틀 ── */}
       <div className="absolute top-5 left-5 z-40 pointer-events-none">
         <h1
-          className="text-white/40 font-light tracking-[0.45em]"
+          className={`font-light tracking-[0.45em] ${txt.dim}`}
           style={{ fontSize: "0.75rem" }}
         >
           바다사서
@@ -108,8 +124,8 @@ export default function OceanScene() {
             onClick={() => setThemeMode(mode)}
             className={`p-1.5 rounded-lg transition-all ${
               themeMode === mode
-                ? "bg-white/20 text-white/90"
-                : "text-white/30 hover:text-white/60 hover:bg-white/8"
+                ? txt.btnActive
+                : txt.btn
             }`}
             aria-label={mode === THEME_MODE.DARK ? "밤" : mode === THEME_MODE.LIGHT ? "낮" : "내 시간대"}
             title={mode === THEME_MODE.DARK ? "밤" : mode === THEME_MODE.LIGHT ? "낮" : "내 시간대"}
@@ -135,12 +151,16 @@ export default function OceanScene() {
 
       {/* ── UI: 오늘 통계 ── */}
       {todayCount !== null && (
-        <div className="fixed bottom-5 right-5 z-40 pointer-events-none text-right">
-          <p className="text-white/25 tracking-wider" style={{ fontSize: "0.65rem" }}>
+        <div
+          className={`fixed bottom-5 right-5 z-40 pointer-events-none text-right px-2.5 py-1.5 rounded-xl transition-colors ${
+            isDaytime ? "bg-black/25 backdrop-blur-sm" : ""
+          }`}
+        >
+          <p className={`${txt.faint} tracking-wider`} style={{ fontSize: "0.65rem" }}>
             오늘 바다에 던져진 마음
           </p>
           <p
-            className="text-white/45 font-light tabular-nums"
+            className={`${txt.mid} font-light tabular-nums`}
             style={{ fontSize: "1.1rem", lineHeight: 1.2 }}
           >
             {todayCount.toLocaleString()}개
@@ -156,10 +176,10 @@ export default function OceanScene() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ delay: 4, duration: 2 }}
-            className="absolute z-20 text-center pointer-events-none"
+            className={`absolute z-20 text-center pointer-events-none px-3 py-1.5 rounded-xl transition-colors`}
             style={{ top: "52%", left: "50%", transform: "translate(-50%, -50%)" }}
           >
-            <p className="text-white/20 tracking-widest" style={{ fontSize: "0.7rem" }}>
+            <p className={`${txt.faint} tracking-widest`} style={{ fontSize: "0.7rem" }}>
               아직 바다가 고요해요...
             </p>
           </motion.div>

@@ -78,17 +78,6 @@ export default function FloatingBottle({
       <div className={arrived ? "bottle-arrived" : "bottle-drifting"}>
         <GlassBottle size={2.4} hasNote bottleColor={bottle.bottleColor} />
       </div>
-      {arrived && (
-        <motion.p
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-center text-white/60 mt-1 whitespace-nowrap"
-          style={{ fontSize: "0.55rem", letterSpacing: "0.1em" }}
-        >
-          열어보기
-        </motion.p>
-      )}
     </motion.div>
   );
 }
