@@ -86,13 +86,30 @@ const NOON: OceanTheme = {
   sunOpacity: 1,
 };
 
+// NOON과 SUNSET 사이: 오후까지 맑은 낮 하늘 유지
+const AFTERNOON: OceanTheme = {
+  skyTop: [62, 142, 218],
+  skyBottom: [102, 178, 232],
+  horizon: [188, 222, 244],   // 오후 수평선도 밝고 선명하게
+  oceanTop: [10, 122, 182],
+  oceanBottom: [5, 68, 132],
+  wetSand: [40, 132, 165],
+  sandLight: [205, 188, 150],
+  sandDark: [228, 210, 168],
+  starOpacity: 0,
+  moonOpacity: 0,
+  moonGlowOpacity: 0,
+  horizonGlowOpacity: 0.15,
+  sunOpacity: 0.95,
+};
+
 // 황금빛 노을 시작 — 하늘은 아직 파랗고 수평선만 따뜻해짐
 const GOLDEN_HOUR: OceanTheme = {
   skyTop: [32, 122, 205],
   skyBottom: [218, 145, 88],
   horizon: [238, 168, 88],
-  oceanTop: [22, 90, 145],
-  oceanBottom: [10, 55, 105],
+  oceanTop: [13, 110, 170],
+  oceanBottom: [8, 60, 130],
   wetSand: [34, 98, 130],
   sandLight: [198, 175, 130],
   sandDark: [220, 195, 148],
@@ -101,7 +118,7 @@ const GOLDEN_HOUR: OceanTheme = {
   moonGlowOpacity: 0,
   horizonGlowOpacity: 0.18,
   sunOpacity: 0.75,
-};
+};  
 
 const SUNSET: OceanTheme = {
   skyTop: [62, 78, 148],
@@ -133,23 +150,6 @@ const DUSK: OceanTheme = {
   moonGlowOpacity: 0.04,
   horizonGlowOpacity: 0.14,
   sunOpacity: 0,
-};
-
-// NOON과 SUNSET 사이: 오후까지 맑은 낮 하늘 유지
-const AFTERNOON: OceanTheme = {
-  skyTop: [62, 142, 218],
-  skyBottom: [102, 178, 232],
-  horizon: [188, 222, 244],   // 오후 수평선도 밝고 선명하게
-  oceanTop: [10, 122, 182],
-  oceanBottom: [5, 68, 132],
-  wetSand: [40, 132, 165],
-  sandLight: [205, 188, 150],
-  sandDark: [228, 210, 168],
-  starOpacity: 0,
-  moonOpacity: 0,
-  moonGlowOpacity: 0,
-  horizonGlowOpacity: 0.15,
-  sunOpacity: 0.95,
 };
 
 // 시간(0~24) → 키프레임 배열
