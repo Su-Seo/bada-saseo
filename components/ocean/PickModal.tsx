@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { playBottlePop } from "@/lib/sounds";
 import { motion } from "framer-motion";
 import MessageCard from "@/components/ui/MessageCard";
-import type { MessageData } from "@/lib/types";
+import { useMessageById } from "./hooks/useMessageById";
 
 interface Props {
   messageId: string;
@@ -12,25 +12,9 @@ interface Props {
 }
 
 export default function PickModal({ messageId, onClose }: Props) {
-  const [message, setMessage] = useState<MessageData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const { message, loading, notFound } = useMessageById(messageId);
 
   useEffect(() => { playBottlePop(); }, []);
-
-  useEffect(() => {
-    fetch(`/api/messages/${messageId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.message) {
-          setMessage(data.message);
-        } else {
-          setNotFound(true);
-        }
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
-  }, [messageId]);
 
   return (
     <motion.div
@@ -39,10 +23,7 @@ export default function PickModal({ messageId, onClose }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative z-10 w-full max-w-md">
         {loading && (
@@ -54,9 +35,7 @@ export default function PickModal({ messageId, onClose }: Props) {
             >
               🍾
             </motion.p>
-            <p className="text-sm text-white/50 tracking-wider">
-              편지를 열어보는 중...
-            </p>
+            <p className="text-sm text-white/50 tracking-wider">편지를 열어보는 중...</p>
           </div>
         )}
 
@@ -73,9 +52,7 @@ export default function PickModal({ messageId, onClose }: Props) {
           </div>
         )}
 
-        {message && (
-          <MessageCard {...message} onClose={onClose} />
-        )}
+        {message && <MessageCard {...message} onClose={onClose} />}
       </div>
     </motion.div>
   );

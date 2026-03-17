@@ -1,41 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MessageInput from "@/components/ui/MessageInput";
 import GlassBottle from "./GlassBottle";
 import BottleCustomizer from "./BottleCustomizer";
-import { postMessage } from "@/lib/api";
-import { DEFAULT_COMPOSE_OPTIONS } from "@/lib/types";
-import type { ComposeOptions } from "@/lib/types";
-
-type Stage = "write" | "throwing" | "done";
+import { useThrowMessage } from "./hooks/useThrowMessage";
 
 interface Props {
   onClose: () => void;
 }
 
 export default function ThrowModal({ onClose }: Props) {
-  const [content, setContent] = useState("");
-  const [options, setOptions] = useState<ComposeOptions>(DEFAULT_COMPOSE_OPTIONS);
-  const [stage, setStage] = useState<Stage>("write");
-  const [error, setError] = useState("");
+  const { content, setContent, options, setOptions, stage, error, handleThrow, complete, reset } =
+    useThrowMessage();
 
-  const handleThrow = async () => {
-    if (!content.trim()) {
-      setError("마음을 담아 적어주세요.");
-      return;
-    }
-    setError("");
-
-    const result = await postMessage(content, options);
-    if (!result.ok) {
-      setError(result.error ?? "오류가 발생했습니다.");
-      return;
-    }
-
-    setStage("throwing");
-    setTimeout(() => setStage("done"), 1600);
+  const onThrow = async () => {
+    const success = await handleThrow();
+    if (success) setTimeout(complete, 1600);
   };
 
   return (
@@ -70,9 +51,7 @@ export default function ThrowModal({ onClose }: Props) {
                 <p className="text-xs text-white/40 tracking-[0.3em] uppercase mb-1">
                   고민 던지기
                 </p>
-                <p className="text-xs text-white/30">
-                  던지는 순간 내 화면에서 사라집니다
-                </p>
+                <p className="text-xs text-white/30">던지는 순간 내 화면에서 사라집니다</p>
               </div>
 
               <BottleCustomizer
@@ -83,12 +62,10 @@ export default function ThrowModal({ onClose }: Props) {
 
               <MessageInput value={content} onChange={setContent} disabled={false} />
 
-              {error && (
-                <p className="text-xs text-red-400 text-center">{error}</p>
-              )}
+              {error && <p className="text-xs text-red-400 text-center">{error}</p>}
 
               <button
-                onClick={handleThrow}
+                onClick={onThrow}
                 disabled={!content.trim()}
                 className="w-full py-3 rounded-2xl bg-white/20 border border-white/30 text-white text-sm tracking-widest hover:bg-white/30 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
               >
@@ -121,10 +98,13 @@ export default function ThrowModal({ onClose }: Props) {
                 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               >
-                <GlassBottle size={3.2} hasNote bottleColor={options.bottleColor} paperStyle={options.paperStyle} />
+                <GlassBottle
+                  size={3.2}
+                  hasNote
+                  bottleColor={options.bottleColor}
+                  paperStyle={options.paperStyle}
+                />
               </motion.div>
-
-
               <p className="text-sm text-white/50 tracking-wider">바다로 던지는 중...</p>
             </motion.div>
           )}
@@ -150,7 +130,7 @@ export default function ThrowModal({ onClose }: Props) {
 
               <div className="flex gap-3 w-full mt-2">
                 <button
-                  onClick={() => { setContent(""); setOptions(DEFAULT_COMPOSE_OPTIONS); setStage("write"); }}
+                  onClick={reset}
                   className="flex-1 py-2 rounded-xl bg-white/10 border border-white/15 text-xs text-white/70 hover:bg-white/20 transition-all"
                 >
                   또 던지기

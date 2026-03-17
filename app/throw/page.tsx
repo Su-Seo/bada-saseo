@@ -1,56 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import OceanBackground from "@/components/animations/OceanBackground";
 import BottleThrow from "@/components/animations/BottleThrow";
 import MessageInput from "@/components/ui/MessageInput";
-
-type Stage = "write" | "throwing" | "done";
+import { useThrowMessage } from "@/components/ocean/hooks/useThrowMessage";
 
 export default function ThrowPage() {
   const router = useRouter();
-  const [content, setContent] = useState("");
-  const [stage, setStage] = useState<Stage>("write");
-  const [error, setError] = useState("");
-
-  const handleThrow = async () => {
-    if (!content.trim()) {
-      setError("마음을 담아 적어주세요.");
-      return;
-    }
-
-    setError("");
-
-    const res = await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "오류가 발생했습니다.");
-      return;
-    }
-
-    setStage("throwing");
-  };
-
-  const handleAnimationComplete = () => {
-    setStage("done");
-  };
+  const { content, setContent, stage, error, handleThrow, complete, reset } = useThrowMessage();
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center px-6 text-white overflow-hidden">
       <OceanBackground />
 
-      {/* 던지기 애니메이션 */}
-      <BottleThrow
-        visible={stage === "throwing"}
-        onComplete={handleAnimationComplete}
-      />
+      <BottleThrow visible={stage === "throwing"} onComplete={complete} />
 
       <div className="relative z-10 w-full max-w-sm flex flex-col gap-6">
         <AnimatePresence mode="wait">
@@ -63,19 +28,13 @@ export default function ThrowPage() {
               className="flex flex-col gap-4"
             >
               <div className="text-center mb-2">
-                <h1 className="text-lg font-light tracking-widest text-white/80">
-                  고민 던지기
-                </h1>
-                <p className="text-xs text-white/40 mt-1">
-                  던지는 순간 내 화면에서 사라집니다
-                </p>
+                <h1 className="text-lg font-light tracking-widest text-white/80">고민 던지기</h1>
+                <p className="text-xs text-white/40 mt-1">던지는 순간 내 화면에서 사라집니다</p>
               </div>
 
               <MessageInput value={content} onChange={setContent} disabled={false} />
 
-              {error && (
-                <p className="text-xs text-red-400 text-center">{error}</p>
-              )}
+              {error && <p className="text-xs text-red-400 text-center">{error}</p>}
 
               <button
                 onClick={handleThrow}
@@ -105,13 +64,11 @@ export default function ThrowPage() {
               <p className="text-base font-light text-white/80 leading-relaxed">
                 마음이 한결 가벼워졌길 바랍니다
               </p>
-              <p className="text-xs text-white/40">
-                누군가 당신의 마음을 읽을 거예요
-              </p>
+              <p className="text-xs text-white/40">누군가 당신의 마음을 읽을 거예요</p>
 
               <div className="flex flex-col gap-3 w-full mt-4">
                 <button
-                  onClick={() => { setContent(""); setStage("write"); }}
+                  onClick={reset}
                   className="w-full py-3 rounded-2xl bg-white/10 border border-white/15 text-sm text-white/70 hover:bg-white/20 transition-all"
                 >
                   또 던지기

@@ -27,26 +27,40 @@ interface CloudData {
   blur: number;
 }
 
+// Seeded PRNG (deterministic) to avoid server/client hydration mismatches
+function seededRandom(seed: number) {
+  let t = seed >>> 0;
+  return function rand() {
+    t = (t + 0x6D2B79F5) | 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function genClouds(count: number): CloudData[] {
+  // fixed seed ensures the same clouds are generated on server and client
+  const rand = seededRandom(1234567);
+
   return Array.from({ length: count }, (_, i) => {
-    const size     = 0.42 + Math.random() * 0.72;    // 0.42 ~ 1.14
+    const size     = 0.42 + rand() * 0.72;    // 0.42 ~ 1.14
     const W        = Math.round(115 * size);          // 48 ~ 132 px
     const H        = Math.round(38 * size);
-    const top      = 14 + Math.random() * 18;
-    const duration = 420 + Math.random() * 180;
-    const screenLeft = 4 + Math.random() * 88;
+    const top      = 14 + rand() * 18;
+    const duration = 420 + rand() * 180;
+    const screenLeft = 4 + rand() * 88;
     const delay    = -((110 - screenLeft) / 220) * duration;
-    const opacity  = 0.48 + Math.random() * 0.22;    // 0.48 ~ 0.70
-    const blur     = 4 + Math.random() * 5;           // 4 ~ 9 px
+    const opacity  = 0.48 + rand() * 0.22;    // 0.48 ~ 0.70
+    const blur     = 4 + rand() * 5;           // 4 ~ 9 px
 
     // 봉긋한 원형 덩어리들
-    const n = 3 + Math.floor(Math.random() * 3);      // 3 ~ 5
+    const n = 3 + Math.floor(rand() * 3);      // 3 ~ 5
     const bumps: Bump[] = [];
     for (let b = 0; b < n; b++) {
       const t = n === 1 ? 0.5 : b / (n - 1);
-      const bh = H * (0.48 + Math.random() * 0.38);
-      const bw = bh * (0.88 + Math.random() * 0.52);
-      const bx = W * 0.04 + t * W * 0.75 - bw / 2 + (Math.random() - 0.5) * W * 0.1;
+      const bh = H * (0.48 + rand() * 0.38);
+      const bw = bh * (0.88 + rand() * 0.52);
+      const bx = W * 0.04 + t * W * 0.75 - bw / 2 + (rand() - 0.5) * W * 0.1;
       const by = H * 0.52 - bh * 0.72;
       bumps.push({ x: bx, y: by, w: bw, h: bh });
     }
