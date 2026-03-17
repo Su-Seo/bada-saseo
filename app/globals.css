@@ -4,7 +4,7 @@
   --font-sans: var(--font-geist);
 }
 
-/* 파도 애니메이션 */
+/* ── 기존 OceanBackground용 파도 (throw/pick 페이지에서 사용) ── */
 @keyframes wave-slow {
   0%, 100% { d: path("M0,160 C360,220 720,100 1080,160 C1260,190 1380,140 1440,160 L1440,320 L0,320 Z"); }
   50% { d: path("M0,180 C360,120 720,220 1080,180 C1260,160 1380,200 1440,180 L1440,320 L0,320 Z"); }
@@ -30,4 +30,118 @@
 
 .animate-wave-fast {
   animation: wave-fast 3s ease-in-out infinite;
+}
+
+/* ── OceanScene 해안 파도 (viewBox 0 0 1440 80 기준) ── */
+@keyframes shore-wave-back {
+  0%, 100% { d: path("M0,35 C360,50 720,20 1080,35 C1260,43 1380,28 1440,35 L1440,80 L0,80 Z"); }
+  50% { d: path("M0,40 C360,25 720,52 1080,40 C1260,35 1380,46 1440,40 L1440,80 L0,80 Z"); }
+}
+
+@keyframes shore-wave-front {
+  0%, 100% { d: path("M0,50 C240,38 480,62 720,50 C960,38 1200,62 1440,50 L1440,80 L0,80 Z"); }
+  50% { d: path("M0,54 C240,66 480,42 720,54 C960,66 1200,42 1440,54 L1440,80 L0,80 Z"); }
+}
+
+.animate-shore-wave-back {
+  animation: shore-wave-back 9s ease-in-out infinite;
+}
+
+.animate-shore-wave-front {
+  animation: shore-wave-front 6s ease-in-out infinite;
+}
+
+/* ── 별 반짝임 ── */
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(0.7); }
+}
+
+.star-twinkle {
+  animation: star-twinkle var(--twinkle-duration, 3s) ease-in-out infinite;
+}
+
+/* ── 유리병 출렁임 (드리프트 중) ── */
+@keyframes bottle-drift-bob {
+  0%, 100% { transform: translateY(0px) rotate(-7deg); }
+  25% { transform: translateY(-5px) rotate(-2deg); }
+  75% { transform: translateY(3px) rotate(5deg); }
+}
+
+/* ── 유리병 출렁임 (해안 도착 후) ── */
+@keyframes bottle-shore-bob {
+  0%, 100% { transform: translateY(0px) rotate(-8deg); }
+  50% { transform: translateY(-8px) rotate(6deg); }
+}
+
+.bottle-drifting {
+  animation: bottle-drift-bob 3.2s ease-in-out infinite;
+  display: inline-block;
+}
+
+.bottle-arrived {
+  animation: bottle-shore-bob 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* ── 해변 병 글린트 ── */
+@keyframes beach-glint {
+  0%, 100% { filter: brightness(1) drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 240, 180, 0.7)); }
+}
+
+.beach-bottle-icon {
+  font-size: 2.2rem;
+  display: inline-block;
+  transform: rotate(-22deg);
+  animation: beach-glint 4.5s ease-in-out infinite;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+
+.beach-bottle-wrapper:hover .beach-bottle-icon {
+  transform: rotate(-5deg) scale(1.2);
+}
+
+/* ── 수평선 glow pulse ── */
+@keyframes horizon-pulse {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.22; }
+}
+
+.horizon-glow {
+  animation: horizon-pulse 6s ease-in-out infinite;
+}
+
+/* ── 해변 빈 유리병 ── */
+.beach-bottle-empty {
+  display: inline-block;
+  font-size: 2.2rem;
+  opacity: 0.38;
+  filter: saturate(0.2) brightness(0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.beach-bottle-empty:hover {
+  opacity: 0.6;
+  filter: saturate(0.45) brightness(0.95);
+  transform: scale(1.12) !important;
+}
+
+/* ── 해변 봉인된 유리병 ── */
+@keyframes beach-filled-pulse {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 240, 175, 0.35)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255, 240, 175, 0.8)); }
+}
+
+.beach-bottle-filled {
+  display: inline-block;
+  font-size: 2.2rem;
+  cursor: grab;
+  animation: beach-filled-pulse 2.5s ease-in-out infinite;
+}
+
+.beach-bottle-filled:active {
+  cursor: grabbing;
 }

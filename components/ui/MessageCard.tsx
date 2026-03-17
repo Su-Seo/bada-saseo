@@ -73,14 +73,6 @@ export default function MessageCard({ id, content, heartCount, onClose }: Props)
             <span className="text-xs text-white/30">신고 완료</span>
           )}
 
-          {/* 닫기 버튼 */}
-          <button
-            onClick={onClose}
-            className="text-xs text-white/50 hover:text-white transition-colors"
-            aria-label="다시 바다로"
-          >
-            다시 바다로 ↩
-          </button>
         </div>
       </div>
     </motion.div>
