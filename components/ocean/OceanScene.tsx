@@ -120,6 +120,7 @@ export default function OceanScene() {
   const [beachBottles, setBeachBottles] = useState<BeachBottleItem[]>([]);
   const [throwOpen, setThrowOpen] = useState(false);
   const [pickMessageId, setPickMessageId] = useState<string | null>(null);
+  const [todayCount, setTodayCount] = useState<number | null>(null);
 
   // ── 테마 ──────────────────────────────────────────
   const [themeMode, setThemeMode] = useState<ThemeMode>(THEME_MODE.DARK);
@@ -212,6 +213,7 @@ export default function OceanScene() {
         if (data.type === "bottle" && data.messageId) {
           if (data.createdAt) since = data.createdAt;
           addBottle(data.messageId);
+          setTodayCount((n) => (n !== null ? n + 1 : 1));
         }
 
         if (data.type === "reconnect") {
@@ -234,6 +236,16 @@ export default function OceanScene() {
       clearTimeout(reconnectTimer);
     };
   }, [addBottle]);
+
+  // ── 오늘 통계 로드 ────────────────────────────────
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((data: { todayCount?: number }) => {
+        if (typeof data.todayCount === "number") setTodayCount(data.todayCount);
+      })
+      .catch(() => {});
+  }, []);
 
   // ── 앰비언트 병 ────────────────────────────────────
   useEffect(() => {
@@ -742,6 +754,28 @@ export default function OceanScene() {
           </button>
         ))}
       </div>
+
+      {/* ────────────────────────────────────────────
+          오늘 통계 (우하단)
+      ──────────────────────────────────────────── */}
+      {todayCount !== null && (
+        <div
+          className="fixed bottom-5 right-5 z-40 pointer-events-none text-right"
+        >
+          <p
+            className="text-white/25 tracking-wider"
+            style={{ fontSize: "0.65rem" }}
+          >
+            오늘 바다에 던져진 마음
+          </p>
+          <p
+            className="text-white/45 font-light tabular-nums"
+            style={{ fontSize: "1.1rem", lineHeight: 1.2 }}
+          >
+            {todayCount.toLocaleString()}개
+          </p>
+        </div>
+      )}
 
       {/* ────────────────────────────────────────────
           빈 바다 안내
