@@ -6,16 +6,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import OceanBackground from "@/components/animations/OceanBackground";
 import BottlePick from "@/components/animations/BottlePick";
 import MessageCard from "@/components/ui/MessageCard";
-import { TAGS, Tag } from "@/lib/constants";
+import { useTags } from "@/components/ocean/hooks/useTags";
 import type { MessageData } from "@/lib/types";
 
 type Stage = "idle" | "floating" | "open" | "empty";
 
 export default function PickPage() {
   const router = useRouter();
+  const { tags } = useTags();
   const [stage, setStage] = useState<Stage>("idle");
   const [message, setMessage] = useState<MessageData | null>(null);
-  const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   const handlePickBottle = async () => {
     const url = selectedTag
@@ -67,7 +68,7 @@ export default function PickPage() {
 
               {/* 태그 필터 */}
               <div className="flex flex-wrap justify-center gap-1.5">
-                {TAGS.map((t) => (
+                {tags.map((t) => (
                   <button
                     key={t}
                     type="button"

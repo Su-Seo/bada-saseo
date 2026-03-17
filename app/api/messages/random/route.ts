@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { TAGS } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   const tagParam = req.nextUrl.searchParams.get("tag");
-  const tag =
-    tagParam && (TAGS as readonly string[]).includes(tagParam) ? tagParam : null;
+
+  // DB에서 태그 유효성 확인
+  let tag: string | null = null;
+  if (tagParam) {
+    const found = await prisma.tag.findFirst({
+      where: { name: tagParam, isActive: true },
+      select: { name: true },
+    });
+    tag = found?.name ?? null;
+  }
 
   const where = {
     isDeleted: false,

@@ -11,8 +11,21 @@ interface Props {
   style?: React.CSSProperties;
 }
 
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const m = /^#([0-9a-fA-F]{6})$/.exec(hex);
+  if (!m) return null;
+  return {
+    r: parseInt(m[1].slice(0, 2), 16),
+    g: parseInt(m[1].slice(2, 4), 16),
+    b: parseInt(m[1].slice(4, 6), 16),
+  };
+}
+
 function buildBottleGradient(color: BottleColor | string | null | undefined) {
-  const base = BOTTLE_COLOR_MAP[(color as BottleColor) ?? "초록"] ?? BOTTLE_COLOR_MAP["초록"];
+  const base =
+    (color && /^#[0-9a-fA-F]{6}$/.test(color)
+      ? hexToRgb(color)
+      : BOTTLE_COLOR_MAP[(color as BottleColor) ?? "초록"]) ?? BOTTLE_COLOR_MAP["초록"];
   const { r, g, b } = base;
   return {
     body: `linear-gradient(90deg,
