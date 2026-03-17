@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+type Star = { key: number; width: number; height: number; top: number; left: number; opacity: number };
 
 export default function OceanBackground() {
   const howlerRef = useRef<{ stop: () => void } | null>(null);
+  const [stars, setStars] = useState<Star[]>([]);
+
+  useEffect(() => {
+    setStars(
+      Array.from({ length: 40 }).map((_, i) => ({
+        key: i,
+        width: Math.random() * 2 + 1,
+        height: Math.random() * 2 + 1,
+        top: Math.random() * 60,
+        left: Math.random() * 100,
+        opacity: Math.random() * 0.7 + 0.3,
+      }))
+    );
+  }, []);
 
   useEffect(() => {
     let howl: { stop: () => void } | null = null;
@@ -27,16 +43,16 @@ export default function OceanBackground() {
     <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-sky-900 via-blue-900 to-blue-950">
       {/* 별/빛 효과 */}
       <div className="absolute inset-0 opacity-30">
-        {Array.from({ length: 40 }).map((_, i) => (
+        {stars.map((s) => (
           <div
-            key={i}
+            key={s.key}
             className="absolute rounded-full bg-white"
             style={{
-              width: Math.random() * 2 + 1 + "px",
-              height: Math.random() * 2 + 1 + "px",
-              top: Math.random() * 60 + "%",
-              left: Math.random() * 100 + "%",
-              opacity: Math.random() * 0.7 + 0.3,
+              width: s.width + "px",
+              height: s.height + "px",
+              top: s.top + "%",
+              left: s.left + "%",
+              opacity: s.opacity,
             }}
           />
         ))}
