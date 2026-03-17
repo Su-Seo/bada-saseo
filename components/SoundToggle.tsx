@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { setSfxVolume } from "@/lib/sounds";
 
 interface HowlLike {
   play: () => void;
@@ -30,6 +31,10 @@ export default function SoundToggle({ isDaytime = false }: { isDaytime?: boolean
       howlRef.current?.stop();
     };
   }, []);
+
+  useEffect(() => {
+    setSfxVolume(volume, playing);
+  }, [volume, playing]);
 
   const toggle = () => {
     if (!howlRef.current) return;

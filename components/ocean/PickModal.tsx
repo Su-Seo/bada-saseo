@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { playBottlePop } from "@/lib/sounds";
 import { motion } from "framer-motion";
 import MessageCard from "@/components/ui/MessageCard";
 import type { MessageData } from "@/lib/types";
@@ -14,6 +15,8 @@ export default function PickModal({ messageId, onClose }: Props) {
   const [message, setMessage] = useState<MessageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => { playBottlePop(); }, []);
 
   useEffect(() => {
     fetch(`/api/messages/${messageId}`)

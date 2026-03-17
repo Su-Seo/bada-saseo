@@ -123,6 +123,8 @@ export default function ThrowModal({ onClose }: Props) {
               >
                 <GlassBottle size={3.2} hasNote bottleColor={options.bottleColor} paperStyle={options.paperStyle} />
               </motion.div>
+
+
               <p className="text-sm text-white/50 tracking-wider">바다로 던지는 중...</p>
             </motion.div>
           )}
