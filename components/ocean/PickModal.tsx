@@ -3,15 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import MessageCard from "@/components/ui/MessageCard";
-
-interface Message {
-  id: string;
-  content: string;
-  tag?: string | null;
-  bottleColor?: string | null;
-  paperStyle?: string | null;
-  heartCount: number;
-}
+import type { MessageData } from "@/lib/types";
 
 interface Props {
   messageId: string;
@@ -19,7 +11,7 @@ interface Props {
 }
 
 export default function PickModal({ messageId, onClose }: Props) {
-  const [message, setMessage] = useState<Message | null>(null);
+  const [message, setMessage] = useState<MessageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -79,15 +71,7 @@ export default function PickModal({ messageId, onClose }: Props) {
         )}
 
         {message && (
-          <MessageCard
-            id={message.id}
-            content={message.content}
-            tag={message.tag}
-            bottleColor={message.bottleColor}
-            paperStyle={message.paperStyle}
-            heartCount={message.heartCount}
-            onClose={onClose}
-          />
+          <MessageCard {...message} onClose={onClose} />
         )}
       </div>
     </motion.div>

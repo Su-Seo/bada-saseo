@@ -7,22 +7,14 @@ import OceanBackground from "@/components/animations/OceanBackground";
 import BottlePick from "@/components/animations/BottlePick";
 import MessageCard from "@/components/ui/MessageCard";
 import { TAGS, Tag } from "@/lib/constants";
+import type { MessageData } from "@/lib/types";
 
 type Stage = "idle" | "floating" | "open" | "empty";
-
-interface Message {
-  id: string;
-  content: string;
-  tag?: string | null;
-  bottleColor?: string | null;
-  paperStyle?: string | null;
-  heartCount: number;
-}
 
 export default function PickPage() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("idle");
-  const [message, setMessage] = useState<Message | null>(null);
+  const [message, setMessage] = useState<MessageData | null>(null);
   const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
 
   const handlePickBottle = async () => {
@@ -130,15 +122,7 @@ export default function PickPage() {
               exit={{ opacity: 0 }}
               className="w-full"
             >
-              <MessageCard
-                id={message.id}
-                content={message.content}
-                tag={message.tag}
-                bottleColor={message.bottleColor}
-                paperStyle={message.paperStyle}
-                heartCount={message.heartCount}
-                onClose={handleClose}
-              />
+              <MessageCard {...message} onClose={handleClose} />
             </motion.div>
           )}
 

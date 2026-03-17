@@ -277,17 +277,8 @@ export default function OceanScene() {
     return () => clearInterval(timer);
   }, []);
 
-  // ── 해변 병 던지기 (API 호출) ────────────────────────
-  const handleBeachThrow = useCallback(
-    (_bottleId: string, content: string, bottleColor: string, paperStyle: string, tag: string | null) => {
-      fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, bottleColor, paperStyle, tag }),
-      }).catch(() => {});
-    },
-    []
-  );
+  // ── 해변 병 던지기 (BeachBottle에서 직접 API 호출, 여기선 제거만) ──
+  const handleBeachThrow = useCallback((_bottleId: string) => {}, []);
 
   const handleBeachRemove = useCallback((bottleId: string) => {
     setBeachBottles((prev) => prev.filter((b) => b.id !== bottleId));

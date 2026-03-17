@@ -4,7 +4,10 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MessageInput from "@/components/ui/MessageInput";
 import GlassBottle from "./GlassBottle";
-import { TAGS, Tag, BOTTLE_COLORS, BottleColor, PAPER_STYLES, PaperStyle, BOTTLE_COLOR_MAP, PAPER_STYLE_MAP } from "@/lib/constants";
+import BottleCustomizer from "./BottleCustomizer";
+import { postMessage } from "@/lib/api";
+import { DEFAULT_COMPOSE_OPTIONS } from "@/lib/types";
+import type { ComposeOptions } from "@/lib/types";
 
 type Stage = "write" | "throwing" | "done";
 
@@ -14,9 +17,7 @@ interface Props {
 
 export default function ThrowModal({ onClose }: Props) {
   const [content, setContent] = useState("");
-  const [tag, setTag] = useState<Tag | null>(null);
-  const [bottleColor, setBottleColor] = useState<BottleColor>("초록");
-  const [paperStyle, setPaperStyle] = useState<PaperStyle>("기본");
+  const [options, setOptions] = useState<ComposeOptions>(DEFAULT_COMPOSE_OPTIONS);
   const [stage, setStage] = useState<Stage>("write");
   const [error, setError] = useState("");
 
@@ -27,15 +28,9 @@ export default function ThrowModal({ onClose }: Props) {
     }
     setError("");
 
-    const res = await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, tag, bottleColor, paperStyle }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "오류가 발생했습니다.");
+    const result = await postMessage(content, options);
+    if (!result.ok) {
+      setError(result.error ?? "오류가 발생했습니다.");
       return;
     }
 
@@ -50,7 +45,6 @@ export default function ThrowModal({ onClose }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* 백드롭 */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={stage === "write" ? onClose : undefined}
@@ -81,97 +75,13 @@ export default function ThrowModal({ onClose }: Props) {
                 </p>
               </div>
 
-              {/* 미리보기 + 커스터마이징 */}
-              <div className="flex gap-3 items-start">
-                {/* 병 미리보기 */}
-                <div className="flex flex-col items-center gap-1 pt-1 shrink-0">
-                  <motion.div
-                    key={bottleColor + paperStyle}
-                    initial={{ scale: 0.85, opacity: 0.6 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <GlassBottle size={3.2} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
-                  </motion.div>
-                  <span className="text-[0.52rem] text-white/25 tracking-wide">{bottleColor} · {PAPER_STYLE_MAP[paperStyle].label}</span>
-                </div>
-
-                {/* 선택 옵션들 */}
-                <div className="flex-1 flex flex-col gap-2.5">
-                  {/* 태그 */}
-                  <div>
-                    <p className="text-[0.6rem] text-white/25 mb-1 tracking-wider">태그</p>
-                    <div className="flex flex-wrap gap-1">
-                      {TAGS.map((t) => (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => setTag(tag === t ? null : t)}
-                          className={`px-2 py-0.5 rounded-full text-[0.6rem] transition-all border ${
-                            tag === t
-                              ? "bg-white/30 border-white/50 text-white"
-                              : "bg-white/5 border-white/15 text-white/40 hover:bg-white/15 hover:text-white/70"
-                          }`}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 병 색상 */}
-                  <div>
-                    <p className="text-[0.6rem] text-white/25 mb-1 tracking-wider">병 색상</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {BOTTLE_COLORS.map((c) => {
-                        const { r, g, b } = BOTTLE_COLOR_MAP[c];
-                        return (
-                          <button
-                            key={c}
-                            type="button"
-                            onClick={() => setBottleColor(c)}
-                            title={c}
-                            className={`w-5 h-5 rounded-full transition-all border-2 ${
-                              bottleColor === c ? "border-white/80 scale-125" : "border-white/20"
-                            }`}
-                            style={{ background: `rgba(${r},${g},${b},0.85)` }}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 편지지 */}
-                  <div>
-                    <p className="text-[0.6rem] text-white/25 mb-1 tracking-wider">편지지</p>
-                    <div className="flex gap-1.5">
-                      {PAPER_STYLES.map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => setPaperStyle(p)}
-                          title={PAPER_STYLE_MAP[p].label}
-                          className={`flex flex-col items-center gap-0.5 transition-all`}
-                        >
-                          <span
-                            className={`w-5 h-5 rounded border-2 block ${
-                              paperStyle === p ? "border-white/80 scale-125" : "border-white/20"
-                            }`}
-                            style={{ background: PAPER_STYLE_MAP[p].note }}
-                          />
-                          <span className="text-[0.45rem] text-white/30">{PAPER_STYLE_MAP[p].label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <MessageInput
-                value={content}
-                onChange={setContent}
-                disabled={false}
+              <BottleCustomizer
+                value={options}
+                onChange={(updates) => setOptions((prev) => ({ ...prev, ...updates }))}
+                size="md"
               />
+
+              <MessageInput value={content} onChange={setContent} disabled={false} />
 
               {error && (
                 <p className="text-xs text-red-400 text-center">{error}</p>
@@ -211,11 +121,9 @@ export default function ThrowModal({ onClose }: Props) {
                 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               >
-                <GlassBottle size={3.2} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
+                <GlassBottle size={3.2} hasNote bottleColor={options.bottleColor} paperStyle={options.paperStyle} />
               </motion.div>
-              <p className="text-sm text-white/50 tracking-wider">
-                바다로 던지는 중...
-              </p>
+              <p className="text-sm text-white/50 tracking-wider">바다로 던지는 중...</p>
             </motion.div>
           )}
 
@@ -236,16 +144,11 @@ export default function ThrowModal({ onClose }: Props) {
               <p className="text-sm font-light text-white/80 leading-relaxed">
                 마음이 한결 가벼워졌길 바랍니다
               </p>
-              <p className="text-xs text-white/40">
-                누군가 당신의 마음을 읽을 거예요
-              </p>
+              <p className="text-xs text-white/40">누군가 당신의 마음을 읽을 거예요</p>
 
               <div className="flex gap-3 w-full mt-2">
                 <button
-                  onClick={() => {
-                    setContent("");
-                    setStage("write");
-                  }}
+                  onClick={() => { setContent(""); setOptions(DEFAULT_COMPOSE_OPTIONS); setStage("write"); }}
                   className="flex-1 py-2 rounded-xl bg-white/10 border border-white/15 text-xs text-white/70 hover:bg-white/20 transition-all"
                 >
                   또 던지기

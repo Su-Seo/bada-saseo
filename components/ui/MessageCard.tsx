@@ -3,14 +3,9 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { PaperStyle, PAPER_STYLE_MAP } from "@/lib/constants";
+import type { MessageData } from "@/lib/types";
 
-interface Props {
-  id: string;
-  content: string;
-  tag?: string | null;
-  bottleColor?: string | null;
-  paperStyle?: string | null;
-  heartCount: number;
+interface Props extends MessageData {
   onClose: () => void;
 }
 
@@ -19,6 +14,7 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
   const [hearted, setHearted] = useState(false);
   const [reported, setReported] = useState(false);
   const [currentHearts, setCurrentHearts] = useState(heartCount);
+  const [copied, setCopied] = useState(false);
 
   const handleHeart = async () => {
     if (hearted) return;
@@ -33,7 +29,6 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
     setReported(true);
   };
 
-  const [copied, setCopied] = useState(false);
   const handleShare = async () => {
     const url = `${window.location.origin}/letter/${id}`;
     if (navigator.share) {
@@ -54,7 +49,7 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
       className="w-full max-w-md backdrop-blur-md border border-white/20 rounded-3xl p-6 text-white shadow-xl"
       style={{ background: `color-mix(in srgb, ${paperBg} 18%, rgba(255,255,255,0.06))` }}
     >
-      {/* 편지지 느낌 헤더 */}
+      {/* 헤더 */}
       <div className="flex items-center justify-center gap-2 mb-4">
         <p className="text-xs text-white/40 tracking-widest uppercase">
           바다에서 건져낸 편지
@@ -71,7 +66,6 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
       </p>
 
       <div className="mt-6 flex items-center justify-between">
-        {/* 하트 버튼 */}
         <button
           onClick={handleHeart}
           disabled={hearted}
@@ -85,7 +79,6 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
         </button>
 
         <div className="flex gap-3 items-center">
-          {/* 공유 버튼 */}
           <button
             onClick={handleShare}
             className="text-xs text-white/40 hover:text-white/70 transition-colors"
@@ -94,7 +87,6 @@ export default function MessageCard({ id, content, tag, paperStyle, heartCount, 
             {copied ? "복사됨 ✓" : "공유"}
           </button>
 
-          {/* 신고 버튼 */}
           {!reported ? (
             <button
               onClick={handleReport}
