@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MessageInput from "@/components/ui/MessageInput";
 import GlassBottle from "./GlassBottle";
-import { TAGS, Tag } from "@/lib/constants";
+import { TAGS, Tag, BOTTLE_COLORS, BottleColor, PAPER_STYLES, PaperStyle, BOTTLE_COLOR_MAP, PAPER_STYLE_MAP } from "@/lib/constants";
 
 type Stage = "write" | "throwing" | "done";
 
@@ -15,6 +15,8 @@ interface Props {
 export default function ThrowModal({ onClose }: Props) {
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<Tag | null>(null);
+  const [bottleColor, setBottleColor] = useState<BottleColor>("초록");
+  const [paperStyle, setPaperStyle] = useState<PaperStyle>("기본");
   const [stage, setStage] = useState<Stage>("write");
   const [error, setError] = useState("");
 
@@ -28,7 +30,7 @@ export default function ThrowModal({ onClose }: Props) {
     const res = await fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, tag }),
+      body: JSON.stringify({ content, tag, bottleColor, paperStyle }),
     });
 
     if (!res.ok) {
@@ -97,6 +99,47 @@ export default function ThrowModal({ onClose }: Props) {
                 ))}
               </div>
 
+              {/* 병 색상 선택 */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/30 w-10 shrink-0">병 색상</span>
+                <div className="flex gap-1.5">
+                  {BOTTLE_COLORS.map((c) => {
+                    const { r, g, b } = BOTTLE_COLOR_MAP[c];
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setBottleColor(c)}
+                        title={c}
+                        className={`w-5 h-5 rounded-full transition-all border-2 ${
+                          bottleColor === c ? "border-white/80 scale-125" : "border-white/20"
+                        }`}
+                        style={{ background: `rgba(${r},${g},${b},0.8)` }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 편지지 스타일 선택 */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/30 w-10 shrink-0">편지지</span>
+                <div className="flex gap-1.5">
+                  {PAPER_STYLES.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setPaperStyle(p)}
+                      title={PAPER_STYLE_MAP[p].label}
+                      className={`w-5 h-5 rounded transition-all border-2 ${
+                        paperStyle === p ? "border-white/80 scale-125" : "border-white/20"
+                      }`}
+                      style={{ background: PAPER_STYLE_MAP[p].note }}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <MessageInput
                 value={content}
                 onChange={setContent}
@@ -141,7 +184,7 @@ export default function ThrowModal({ onClose }: Props) {
                 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               >
-                <GlassBottle size={3.2} hasNote />
+                <GlassBottle size={3.2} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
               </motion.div>
               <p className="text-sm text-white/50 tracking-wider">
                 바다로 던지는 중...

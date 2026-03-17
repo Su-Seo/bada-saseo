@@ -2,16 +2,20 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { PaperStyle, PAPER_STYLE_MAP } from "@/lib/constants";
 
 interface Props {
   id: string;
   content: string;
   tag?: string | null;
+  bottleColor?: string | null;
+  paperStyle?: string | null;
   heartCount: number;
   onClose: () => void;
 }
 
-export default function MessageCard({ id, content, tag, heartCount, onClose }: Props) {
+export default function MessageCard({ id, content, tag, paperStyle, heartCount, onClose }: Props) {
+  const paperBg = PAPER_STYLE_MAP[(paperStyle as PaperStyle) ?? "기본"]?.note ?? PAPER_STYLE_MAP["기본"].note;
   const [hearted, setHearted] = useState(false);
   const [reported, setReported] = useState(false);
   const [currentHearts, setCurrentHearts] = useState(heartCount);
@@ -35,7 +39,8 @@ export default function MessageCard({ id, content, tag, heartCount, onClose }: P
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: -10 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-full max-w-md bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 text-white shadow-xl"
+      className="w-full max-w-md backdrop-blur-md border border-white/20 rounded-3xl p-6 text-white shadow-xl"
+      style={{ background: `color-mix(in srgb, ${paperBg} 18%, rgba(255,255,255,0.06))` }}
     >
       {/* 편지지 느낌 헤더 */}
       <div className="flex items-center justify-center gap-2 mb-4">

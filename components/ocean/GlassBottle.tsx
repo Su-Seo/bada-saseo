@@ -1,16 +1,45 @@
 "use client";
 
+import { BottleColor, PaperStyle, BOTTLE_COLOR_MAP, PAPER_STYLE_MAP } from "@/lib/constants";
+
 interface Props {
-  size?: number;       // rem 단위 높이 (기본 2.4)
-  hasNote?: boolean;   // 편지가 들어있는지
+  size?: number;
+  hasNote?: boolean;
+  bottleColor?: BottleColor | string | null;
+  paperStyle?: PaperStyle | string | null;
   className?: string;
   style?: React.CSSProperties;
 }
 
-export default function GlassBottle({ size = 2.4, hasNote, className = "", style }: Props) {
-  const w = size * 0.38;  // 병 너비 비율
+function buildBottleGradient(color: BottleColor | string | null | undefined) {
+  const base = BOTTLE_COLOR_MAP[(color as BottleColor) ?? "초록"] ?? BOTTLE_COLOR_MAP["초록"];
+  const { r, g, b } = base;
+  return {
+    body: `linear-gradient(90deg,
+      rgba(${r-50},${g-45},${b-43},0.4) 0%,
+      rgba(${r-20},${g-20},${b-18},0.55) 20%,
+      rgba(${r},${g},${b},0.65) 40%,
+      rgba(${r+15},${g+15},${b+12},0.7) 50%,
+      rgba(${r},${g},${b},0.65) 60%,
+      rgba(${r-20},${g-20},${b-18},0.55) 80%,
+      rgba(${r-50},${g-45},${b-43},0.4) 100%
+    )`,
+    neck: `linear-gradient(90deg,
+      rgba(${r-30},${g-25},${b-23},0.5) 0%,
+      rgba(${r+5},${g+5},${b+2},0.62) 30%,
+      rgba(${r+25},${g+20},${b+17},0.7) 50%,
+      rgba(${r+5},${g+5},${b+2},0.62) 70%,
+      rgba(${r-30},${g-25},${b-23},0.5) 100%
+    )`,
+  };
+}
+
+export default function GlassBottle({ size = 2.4, hasNote, bottleColor, paperStyle, className = "", style }: Props) {
+  const w = size * 0.38;
   const neckW = w * 0.38;
   const corkW = neckW * 1.15;
+  const gradient = buildBottleGradient(bottleColor);
+  const noteColor = PAPER_STYLE_MAP[(paperStyle as PaperStyle) ?? "기본"]?.bg ?? PAPER_STYLE_MAP["기본"].bg;
 
   return (
     <div
@@ -42,6 +71,7 @@ export default function GlassBottle({ size = 2.4, hasNote, className = "", style
           width: `${neckW}rem`,
           height: `${size * 0.22}rem`,
           borderRadius: `${size * 0.02}rem ${size * 0.02}rem 0 0`,
+          background: gradient.neck,
         }}
       />
 
@@ -52,16 +82,14 @@ export default function GlassBottle({ size = 2.4, hasNote, className = "", style
           width: `${w}rem`,
           height: `${size * 0.58}rem`,
           borderRadius: `${size * 0.06}rem ${size * 0.06}rem ${size * 0.1}rem ${size * 0.1}rem`,
+          background: gradient.body,
         }}
       >
-        {/* 유리 하이라이트 (왼쪽 반사광) */}
         <div className="bottle-highlight-left" />
-        {/* 유리 하이라이트 (오른쪽 에지) */}
         <div className="bottle-highlight-right" />
 
-        {/* 편지 */}
         {hasNote && (
-          <div className="bottle-note">
+          <div className="bottle-note" style={{ background: noteColor }}>
             <div className="bottle-note-lines" />
           </div>
         )}

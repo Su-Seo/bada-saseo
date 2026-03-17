@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
       id: true,
       content: true,
       tag: true,
+      bottleColor: true,
+      paperStyle: true,
       heartCount: true,
       createdAt: true,
     },

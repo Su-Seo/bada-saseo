@@ -14,6 +14,8 @@ interface Message {
   id: string;
   content: string;
   tag?: string | null;
+  bottleColor?: string | null;
+  paperStyle?: string | null;
   heartCount: number;
 }
 
@@ -132,6 +134,8 @@ export default function PickPage() {
                 id={message.id}
                 content={message.content}
                 tag={message.tag}
+                bottleColor={message.bottleColor}
+                paperStyle={message.paperStyle}
                 heartCount={message.heartCount}
                 onClose={handleClose}
               />

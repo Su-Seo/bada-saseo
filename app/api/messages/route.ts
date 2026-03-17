@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { containsBadWords } from "@/lib/filter";
-import { MAX_LENGTH, EXPIRE_DAYS, TAGS, Tag } from "@/lib/constants";
+import { MAX_LENGTH, EXPIRE_DAYS, TAGS, Tag, BOTTLE_COLORS, BottleColor, PAPER_STYLES, PaperStyle } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -13,6 +13,14 @@ export async function POST(req: NextRequest) {
   const content = body.content.trim();
   const tag: Tag | null =
     body.tag && (TAGS as readonly string[]).includes(body.tag) ? body.tag : null;
+  const bottleColor: BottleColor | null =
+    body.bottleColor && (BOTTLE_COLORS as readonly string[]).includes(body.bottleColor)
+      ? body.bottleColor
+      : null;
+  const paperStyle: PaperStyle | null =
+    body.paperStyle && (PAPER_STYLES as readonly string[]).includes(body.paperStyle)
+      ? body.paperStyle
+      : null;
 
   if (content.length === 0) {
     return NextResponse.json({ error: "내용을 입력해주세요." }, { status: 400 });
@@ -35,7 +43,7 @@ export async function POST(req: NextRequest) {
   const expiresAt = new Date(Date.now() + EXPIRE_DAYS * 24 * 60 * 60 * 1000);
 
   await prisma.message.create({
-    data: { content, tag, expiresAt },
+    data: { content, tag, bottleColor, paperStyle, expiresAt },
   });
 
   return NextResponse.json({ success: true }, { status: 201 });

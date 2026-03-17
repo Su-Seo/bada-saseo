@@ -9,7 +9,7 @@ export async function GET(
 
   const message = await prisma.message.findUnique({
     where: { id, isDeleted: false },
-    select: { id: true, content: true, tag: true, heartCount: true },
+    select: { id: true, content: true, tag: true, bottleColor: true, paperStyle: true, heartCount: true },
   });
 
   if (!message) {

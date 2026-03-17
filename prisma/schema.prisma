@@ -11,6 +11,8 @@ model Message {
   id          String   @id @default(cuid())
   content     String   @db.VarChar(500)
   tag         String?  @db.VarChar(10)
+  bottleColor String?  @db.VarChar(10)
+  paperStyle  String?  @db.VarChar(10)
   heartCount  Int      @default(0)
   reportCount Int      @default(0)
   isDeleted   Boolean  @default(false)
