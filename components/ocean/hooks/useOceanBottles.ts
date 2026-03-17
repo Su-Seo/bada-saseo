@@ -1,0 +1,119 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { BottleData } from "../FloatingBottle";
+import { MAX_BOTTLES } from "../constants";
+
+function rand(min: number, max: number) {
+  return min + Math.random() * (max - min);
+}
+
+function createBottle(messageId: string, bottleColor?: string | null): BottleData {
+  return {
+    id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    messageId,
+    x: rand(10, 84),
+    xDrift: rand(-45, 45),
+    duration: rand(20, 30),
+    bottleColor: bottleColor ?? null,
+  };
+}
+
+export function useOceanBottles() {
+  const [bottles, setBottles] = useState<BottleData[]>([]);
+  const [todayCount, setTodayCount] = useState<number | null>(null);
+  const queueRef = useRef<string[]>([]);
+
+  const addBottle = useCallback((messageId: string, bottleColor?: string | null) => {
+    setBottles((prev) => {
+      if (prev.length >= MAX_BOTTLES) {
+        queueRef.current.push(messageId);
+        return prev;
+      }
+      return [...prev, createBottle(messageId, bottleColor)];
+    });
+  }, []);
+
+  const removeBottle = useCallback((bottleId: string) => {
+    setBottles((prev) => {
+      const next = prev.filter((b) => b.id !== bottleId);
+      if (next.length < MAX_BOTTLES && queueRef.current.length > 0) {
+        const queued = queueRef.current.shift()!;
+        return [...next, createBottle(queued)];
+      }
+      return next;
+    });
+  }, []);
+
+  // ── SSE 연결 ──────────────────────────────────────
+  useEffect(() => {
+    let es: EventSource | null = null;
+    let since = new Date().toISOString();
+    let reconnectTimer: ReturnType<typeof setTimeout>;
+    let mounted = true;
+
+    const connect = () => {
+      if (!mounted) return;
+      es = new EventSource(`/api/sse?since=${encodeURIComponent(since)}`);
+
+      es.onmessage = (e) => {
+        const data = JSON.parse(e.data) as {
+          type: string;
+          messageId?: string;
+          createdAt?: string;
+          since?: string;
+          bottleColor?: string | null;
+        };
+
+        if (data.type === "bottle" && data.messageId) {
+          if (data.createdAt) since = data.createdAt;
+          addBottle(data.messageId, data.bottleColor);
+          setTodayCount((n) => (n !== null ? n + 1 : 1));
+        }
+
+        if (data.type === "reconnect") {
+          if (data.since) since = data.since;
+          es?.close();
+          reconnectTimer = setTimeout(connect, 150);
+        }
+      };
+
+      es.onerror = () => {
+        es?.close();
+        reconnectTimer = setTimeout(connect, 5000);
+      };
+    };
+
+    connect();
+    return () => {
+      mounted = false;
+      es?.close();
+      clearTimeout(reconnectTimer);
+    };
+  }, [addBottle]);
+
+  // ── 오늘 통계 로드 ────────────────────────────────
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((data: { todayCount?: number }) => {
+        if (typeof data.todayCount === "number") setTodayCount(data.todayCount);
+      })
+      .catch(() => {});
+  }, []);
+
+  // ── 앰비언트 병 ────────────────────────────────────
+  useEffect(() => {
+    fetch("/api/messages/ambient")
+      .then((r) => r.json())
+      .then((data: { messages?: { id: string; bottleColor?: string | null }[] }) => {
+        if (!data.messages) return;
+        data.messages.slice(0, 4).forEach((msg, i) => {
+          setTimeout(() => addBottle(msg.id, msg.bottleColor), i * 2200);
+        });
+      })
+      .catch(() => {});
+  }, [addBottle]);
+
+  return { bottles, addBottle, removeBottle, todayCount };
+}
