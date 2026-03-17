@@ -165,7 +165,7 @@ export default function BeachBottle({
                 className="absolute bottom-full mb-3 bg-black/55 backdrop-blur-xl border border-white/20 rounded-2xl p-3 text-white"
                 style={{
                   zIndex: 38,
-                  width: "15rem",
+                  width: "16rem",
                   left: "50%",
                   transform: `translateX(${x < 22 ? "-15%" : x > 78 ? "-85%" : "-50%"})`,
                 }}
@@ -183,7 +183,7 @@ export default function BeachBottle({
                   onChange={(e) => setContent(e.target.value)}
                   maxLength={MAX_LENGTH}
                   placeholder="마음을 적어보세요..."
-                  className="w-full h-20 resize-none rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/30 p-2 text-xs leading-relaxed focus:outline-none focus:border-white/40 transition-colors mt-2"
+                  className="w-full h-20 resize-none rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/30 p-2 text-xs leading-relaxed focus:outline-none focus:border-white/40 transition-colors mt-4"
                   autoFocus
                 />
 

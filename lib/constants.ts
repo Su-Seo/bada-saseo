@@ -7,7 +7,7 @@ export const FALLBACK_TAGS = ["연애", "진로", "가족", "친구", "건강", 
 
 export const BOTTLE_COLORS = [
   "초록", "청록", "파랑", "남색", "보라",
-  "분홍", "빨강", "호박", "금", "은",
+  "분홍", "빨강", "금", "은",
 ] as const;
 export type BottleColor = (typeof BOTTLE_COLORS)[number];
 
@@ -26,7 +26,6 @@ export const BOTTLE_COLOR_MAP: Record<BottleColor, { r: number; g: number; b: nu
   보라: { r: 155, g: 120, b: 215 },
   분홍: { r: 220, g: 135, b: 170 },
   빨강: { r: 210, g: 90,  b: 90  },
-  호박: { r: 210, g: 165, b: 85  },
   금:   { r: 210, g: 175, b: 60  },
   은:   { r: 180, g: 185, b: 200 },
 };
