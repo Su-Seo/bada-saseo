@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import SoundToggle from "@/components/SoundToggle";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -14,7 +13,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body className={`${geist.variable} font-sans antialiased`}>
-        <SoundToggle />
         {children}
       </body>
     </html>

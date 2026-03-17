@@ -9,7 +9,7 @@ interface HowlLike {
   playing: () => boolean;
 }
 
-export default function SoundToggle() {
+export default function SoundToggle({ isDaytime = false }: { isDaytime?: boolean }) {
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.3);
   const [showSlider, setShowSlider] = useState(false);
@@ -92,14 +92,14 @@ export default function SoundToggle() {
   return (
     <div
       ref={containerRef}
-      className="fixed top-4 right-4 z-50 flex flex-col items-center gap-2"
+      className="relative flex flex-col items-center"
       onPointerEnter={handleEnter}
       onPointerLeave={handleLeave}
     >
       {/* 토글 버튼 */}
       <button
         onClick={toggle}
-        className="p-2.5 rounded-full bg-white/10 backdrop-blur-sm text-white/70 hover:bg-white/20 hover:text-white transition-all"
+        className={`p-1.5 rounded-lg backdrop-blur-sm transition-all ${isDaytime ? "text-white/70 hover:text-white hover:bg-black/15" : "text-white/30 hover:text-white/60 hover:bg-white/8"}`}
         aria-label={playing ? "소리 끄기" : "파도 소리 켜기"}
         title={playing ? "소리 끄기" : "파도 소리 켜기"}
       >
@@ -116,7 +116,7 @@ export default function SoundToggle() {
 
       {/* 볼륨 슬라이더 */}
       <div
-        className={`flex flex-col items-center gap-1.5 py-2.5 px-1.5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 transition-all duration-300 ${
+        className={`absolute top-full mt-2 flex flex-col items-center gap-1.5 py-2.5 px-1.5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 transition-all duration-300 ${
           showSlider
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
