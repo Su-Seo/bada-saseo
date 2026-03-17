@@ -11,7 +11,7 @@ export async function GET() {
     },
     orderBy: { createdAt: "desc" },
     take: 4,
-    select: { id: true },
+    select: { id: true, bottleColor: true },
   });
 
   return NextResponse.json({ messages });

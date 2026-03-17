@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
               expiresAt: { gt: new Date() },
             },
             orderBy: { createdAt: "asc" },
-            select: { id: true, createdAt: true },
+            select: { id: true, createdAt: true, bottleColor: true },
           });
 
           for (const msg of messages) {
@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
               type: "bottle",
               messageId: msg.id,
               createdAt: msg.createdAt.toISOString(),
+              bottleColor: msg.bottleColor ?? null,
             });
             lastChecked = msg.createdAt;
           }

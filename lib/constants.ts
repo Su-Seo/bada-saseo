@@ -5,7 +5,10 @@ export const REPORT_THRESHOLD = 3;
 export const TAGS = ["연애", "진로", "가족", "친구", "건강", "일상", "기타"] as const;
 export type Tag = (typeof TAGS)[number];
 
-export const BOTTLE_COLORS = ["초록", "파랑", "보라", "분홍", "호박"] as const;
+export const BOTTLE_COLORS = [
+  "초록", "청록", "파랑", "남색", "보라",
+  "분홍", "빨강", "호박", "금", "은",
+] as const;
 export type BottleColor = (typeof BOTTLE_COLORS)[number];
 
 export const PAPER_STYLES = ["기본", "낡은", "분홍", "파랑"] as const;
@@ -14,10 +17,15 @@ export type PaperStyle = (typeof PAPER_STYLES)[number];
 // 병 색상별 RGB 기준값 (bottle-body 그라디언트 중심색)
 export const BOTTLE_COLOR_MAP: Record<BottleColor, { r: number; g: number; b: number }> = {
   초록: { r: 130, g: 195, b: 178 },
+  청록: { r: 80,  g: 200, b: 200 },
   파랑: { r: 100, g: 155, b: 225 },
+  남색: { r: 80,  g: 110, b: 200 },
   보라: { r: 155, g: 120, b: 215 },
   분홍: { r: 220, g: 135, b: 170 },
-  호박: { r: 210, g: 165, b: 85 },
+  빨강: { r: 210, g: 90,  b: 90  },
+  호박: { r: 210, g: 165, b: 85  },
+  금:   { r: 210, g: 175, b: 60  },
+  은:   { r: 180, g: 185, b: 200 },
 };
 
 // 편지지 스타일별 색상 (MessageCard 배경, 병 속 종이)

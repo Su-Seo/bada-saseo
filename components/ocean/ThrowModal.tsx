@@ -81,62 +81,89 @@ export default function ThrowModal({ onClose }: Props) {
                 </p>
               </div>
 
-              {/* 태그 선택 */}
-              <div className="flex flex-wrap gap-1.5">
-                {TAGS.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setTag(tag === t ? null : t)}
-                    className={`px-2.5 py-1 rounded-full text-xs transition-all border ${
-                      tag === t
-                        ? "bg-white/30 border-white/50 text-white"
-                        : "bg-white/5 border-white/15 text-white/40 hover:bg-white/15 hover:text-white/70"
-                    }`}
+              {/* 미리보기 + 커스터마이징 */}
+              <div className="flex gap-3 items-start">
+                {/* 병 미리보기 */}
+                <div className="flex flex-col items-center gap-1 pt-1 shrink-0">
+                  <motion.div
+                    key={bottleColor + paperStyle}
+                    initial={{ scale: 0.85, opacity: 0.6 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {t}
-                  </button>
-                ))}
-              </div>
-
-              {/* 병 색상 선택 */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-white/30 w-10 shrink-0">병 색상</span>
-                <div className="flex gap-1.5">
-                  {BOTTLE_COLORS.map((c) => {
-                    const { r, g, b } = BOTTLE_COLOR_MAP[c];
-                    return (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => setBottleColor(c)}
-                        title={c}
-                        className={`w-5 h-5 rounded-full transition-all border-2 ${
-                          bottleColor === c ? "border-white/80 scale-125" : "border-white/20"
-                        }`}
-                        style={{ background: `rgba(${r},${g},${b},0.8)` }}
-                      />
-                    );
-                  })}
+                    <GlassBottle size={3.2} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
+                  </motion.div>
+                  <span className="text-[0.52rem] text-white/25 tracking-wide">{bottleColor} · {PAPER_STYLE_MAP[paperStyle].label}</span>
                 </div>
-              </div>
 
-              {/* 편지지 스타일 선택 */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-white/30 w-10 shrink-0">편지지</span>
-                <div className="flex gap-1.5">
-                  {PAPER_STYLES.map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setPaperStyle(p)}
-                      title={PAPER_STYLE_MAP[p].label}
-                      className={`w-5 h-5 rounded transition-all border-2 ${
-                        paperStyle === p ? "border-white/80 scale-125" : "border-white/20"
-                      }`}
-                      style={{ background: PAPER_STYLE_MAP[p].note }}
-                    />
-                  ))}
+                {/* 선택 옵션들 */}
+                <div className="flex-1 flex flex-col gap-2.5">
+                  {/* 태그 */}
+                  <div>
+                    <p className="text-[0.6rem] text-white/25 mb-1 tracking-wider">태그</p>
+                    <div className="flex flex-wrap gap-1">
+                      {TAGS.map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setTag(tag === t ? null : t)}
+                          className={`px-2 py-0.5 rounded-full text-[0.6rem] transition-all border ${
+                            tag === t
+                              ? "bg-white/30 border-white/50 text-white"
+                              : "bg-white/5 border-white/15 text-white/40 hover:bg-white/15 hover:text-white/70"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 병 색상 */}
+                  <div>
+                    <p className="text-[0.6rem] text-white/25 mb-1 tracking-wider">병 색상</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {BOTTLE_COLORS.map((c) => {
+                        const { r, g, b } = BOTTLE_COLOR_MAP[c];
+                        return (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setBottleColor(c)}
+                            title={c}
+                            className={`w-5 h-5 rounded-full transition-all border-2 ${
+                              bottleColor === c ? "border-white/80 scale-125" : "border-white/20"
+                            }`}
+                            style={{ background: `rgba(${r},${g},${b},0.85)` }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 편지지 */}
+                  <div>
+                    <p className="text-[0.6rem] text-white/25 mb-1 tracking-wider">편지지</p>
+                    <div className="flex gap-1.5">
+                      {PAPER_STYLES.map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setPaperStyle(p)}
+                          title={PAPER_STYLE_MAP[p].label}
+                          className={`flex flex-col items-center gap-0.5 transition-all`}
+                        >
+                          <span
+                            className={`w-5 h-5 rounded border-2 block ${
+                              paperStyle === p ? "border-white/80 scale-125" : "border-white/20"
+                            }`}
+                            style={{ background: PAPER_STYLE_MAP[p].note }}
+                          />
+                          <span className="text-[0.45rem] text-white/30">{PAPER_STYLE_MAP[p].label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 

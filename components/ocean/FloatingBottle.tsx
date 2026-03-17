@@ -7,9 +7,10 @@ import GlassBottle from "./GlassBottle";
 export interface BottleData {
   id: string;
   messageId: string;
-  x: number;       // 화면 좌측 기준 % (10~85)
-  xDrift: number;  // 표류 중 수평 이동량 (px)
-  duration: number; // 수평선 → 해안 이동 시간 (초)
+  x: number;
+  xDrift: number;
+  duration: number;
+  bottleColor?: string | null;
 }
 
 interface Props {
@@ -75,7 +76,7 @@ export default function FloatingBottle({
       onClick={() => onClick({ messageId: bottle.messageId, bottleId: bottle.id })}
     >
       <div className={arrived ? "bottle-arrived" : "bottle-drifting"}>
-        <GlassBottle size={2.4} hasNote />
+        <GlassBottle size={2.4} hasNote bottleColor={bottle.bottleColor} />
       </div>
       {arrived && (
         <motion.p

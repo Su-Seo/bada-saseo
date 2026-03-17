@@ -2,17 +2,17 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MAX_LENGTH } from "@/lib/constants";
+import { MAX_LENGTH, TAGS, Tag, BOTTLE_COLORS, BottleColor, PAPER_STYLES, PaperStyle, BOTTLE_COLOR_MAP, PAPER_STYLE_MAP } from "@/lib/constants";
 import GlassBottle from "./GlassBottle";
 
 interface Props {
   id: string;
-  x: number;        // left % on beach
-  y: number;        // bottom % from screen
+  x: number;
+  y: number;
   rotation: number;
-  shoreY: number;   // 해안선 y (px)
-  horizonY: number; // 수평선 y (px)
-  onThrow: (id: string, content: string) => void;
+  shoreY: number;
+  horizonY: number;
+  onThrow: (id: string, content: string, bottleColor: BottleColor, paperStyle: PaperStyle, tag: Tag | null) => void;
   onRemove: (id: string) => void;
 }
 
@@ -30,23 +30,19 @@ export default function BeachBottle({
 }: Props) {
   const [state, setState] = useState<State>("empty");
   const [content, setContent] = useState("");
+  const [tag, setTag] = useState<Tag | null>(null);
+  const [bottleColor, setBottleColor] = useState<BottleColor>("초록");
+  const [paperStyle, setPaperStyle] = useState<PaperStyle>("기본");
   const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(
-    null
-  );
-  const [throwData, setThrowData] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
+  const [throwData, setThrowData] = useState<{ x: number; y: number } | null>(null);
   const bottleRef = useRef<HTMLDivElement>(null);
 
-  // ── 빈 병 클릭 → 글쓰기 ──
   const handleClick = () => {
     if (state === "empty") setState("writing");
   };
 
-  // ── 봉인 (내용 검증 후 filled 상태로) ──
   const handleSeal = () => {
     const trimmed = content.trim();
     if (!trimmed) return;
@@ -61,6 +57,9 @@ export default function BeachBottle({
   const handleCancel = () => {
     setContent("");
     setError("");
+    setTag(null);
+    setBottleColor("초록");
+    setPaperStyle("기본");
     setState("empty");
   };
 
@@ -83,17 +82,15 @@ export default function BeachBottle({
     setIsDragging(false);
 
     if (e.clientY < shoreY) {
-      // 바다에 도달 → 던지기!
       setThrowData({ x: e.clientX, y: e.clientY });
       setState("throwing");
-      onThrow(id, content);
+      onThrow(id, content, bottleColor, paperStyle, tag);
     } else {
-      // 해변으로 돌아오기
       setDragPos(null);
     }
   };
 
-  // ── 던지기 애니메이션 (수평선 방향으로 축소) ──
+  // ── 던지기 애니메이션 ──
   if (state === "throwing" && throwData) {
     return (
       <motion.div
@@ -114,14 +111,14 @@ export default function BeachBottle({
         transition={{ duration: 1.4, ease: [0.15, 0.75, 0.35, 1] }}
         onAnimationComplete={() => onRemove(id)}
       >
-        <GlassBottle size={2.8} hasNote />
+        <GlassBottle size={2.8} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
       </motion.div>
     );
   }
 
   return (
     <>
-      {/* ── 해변 위의 병 (드래그 중이 아닐 때) ── */}
+      {/* ── 해변 위의 병 ── */}
       {!isDragging && (
         <motion.div
           ref={bottleRef}
@@ -140,14 +137,15 @@ export default function BeachBottle({
             style={{ touchAction: "none", cursor: state === "filled" ? "grab" : "pointer" }}
           >
             <span
-              className={
-                state === "filled"
-                  ? "beach-bottle-filled"
-                  : "beach-bottle-empty"
-              }
+              className={state === "filled" ? "beach-bottle-filled" : "beach-bottle-empty"}
               style={{ transform: `rotate(${rotation}deg)` }}
             >
-              <GlassBottle size={2.2} hasNote={state === "filled"} />
+              <GlassBottle
+                size={2.2}
+                hasNote={state === "filled"}
+                bottleColor={state === "filled" ? bottleColor : undefined}
+                paperStyle={state === "filled" ? paperStyle : undefined}
+              />
             </span>
           </div>
 
@@ -174,9 +172,10 @@ export default function BeachBottle({
                 initial={{ opacity: 0, y: 10, scale: 0.92 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.92 }}
-                className="absolute bottom-full mb-3 w-56 bg-black/50 backdrop-blur-xl border border-white/20 rounded-2xl p-3 text-white"
+                className="absolute bottom-full mb-3 bg-black/55 backdrop-blur-xl border border-white/20 rounded-2xl p-3 text-white"
                 style={{
                   zIndex: 38,
+                  width: "15rem",
                   left: "50%",
                   transform: `translateX(${
                     x < 22 ? "-15%" : x > 78 ? "-85%" : "-50%"
@@ -185,12 +184,79 @@ export default function BeachBottle({
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >
+                {/* 미리보기 + 입력 헤더 */}
+                <div className="flex items-center gap-2 mb-2">
+                  <GlassBottle size={2.0} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[0.58rem] text-white/40 tracking-widest mb-1">마음 담기</p>
+                    {/* 태그 */}
+                    <div className="flex flex-wrap gap-1">
+                      {TAGS.map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setTag(tag === t ? null : t)}
+                          className={`px-1.5 py-0.5 rounded-full text-[0.5rem] transition-all border ${
+                            tag === t
+                              ? "bg-white/25 border-white/50 text-white"
+                              : "bg-white/5 border-white/15 text-white/35 hover:bg-white/15"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 병 색상 */}
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[0.5rem] text-white/30 w-8 shrink-0">색상</span>
+                  <div className="flex flex-wrap gap-1">
+                    {BOTTLE_COLORS.map((c) => {
+                      const { r, g, b } = BOTTLE_COLOR_MAP[c];
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setBottleColor(c)}
+                          title={c}
+                          className={`w-3.5 h-3.5 rounded-full transition-all border ${
+                            bottleColor === c ? "border-white/80 scale-125" : "border-white/20"
+                          }`}
+                          style={{ background: `rgba(${r},${g},${b},0.85)` }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 편지지 */}
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-[0.5rem] text-white/30 w-8 shrink-0">편지지</span>
+                  <div className="flex gap-1">
+                    {PAPER_STYLES.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPaperStyle(p)}
+                        title={PAPER_STYLE_MAP[p].label}
+                        className={`w-3.5 h-3.5 rounded transition-all border ${
+                          paperStyle === p ? "border-white/80 scale-125" : "border-white/20"
+                        }`}
+                        style={{ background: PAPER_STYLE_MAP[p].note }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* 텍스트 입력 */}
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   maxLength={MAX_LENGTH}
                   placeholder="마음을 적어보세요..."
-                  className="w-full h-24 resize-none rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/30 p-2.5 text-xs leading-relaxed focus:outline-none focus:border-white/40 transition-colors"
+                  className="w-full h-20 resize-none rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/30 p-2 text-xs leading-relaxed focus:outline-none focus:border-white/40 transition-colors"
                   autoFocus
                 />
 
@@ -224,7 +290,7 @@ export default function BeachBottle({
         </motion.div>
       )}
 
-      {/* ── 드래그 오버레이 (전체 화면) ── */}
+      {/* ── 드래그 오버레이 ── */}
       {isDragging && dragPos && (
         <div
           className="fixed inset-0 z-[80]"
@@ -232,20 +298,16 @@ export default function BeachBottle({
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
         >
-          {/* 바다 드롭존 하이라이트 */}
           <motion.div
             className="absolute inset-x-0 top-0 pointer-events-none"
             style={{ height: shoreY }}
             animate={{
               backgroundColor:
-                dragPos.y < shoreY
-                  ? "rgba(70, 150, 255, 0.07)"
-                  : "transparent",
+                dragPos.y < shoreY ? "rgba(70,150,255,0.07)" : "transparent",
             }}
             transition={{ duration: 0.2 }}
           />
 
-          {/* 드롭 힌트 */}
           <AnimatePresence>
             {dragPos.y < shoreY + 60 && dragPos.y > shoreY - 120 && (
               <motion.p
@@ -253,11 +315,7 @@ export default function BeachBottle({
                 animate={{ opacity: 0.65 }}
                 exit={{ opacity: 0 }}
                 className="absolute left-1/2 -translate-x-1/2 text-white/50 pointer-events-none"
-                style={{
-                  top: shoreY - 28,
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.1em",
-                }}
+                style={{ top: shoreY - 28, fontSize: "0.6rem", letterSpacing: "0.1em" }}
               >
                 여기서 놓으면 바다로 던져집니다
               </motion.p>
@@ -267,22 +325,16 @@ export default function BeachBottle({
           {/* 드래그 중인 병 */}
           <div
             className="absolute pointer-events-none"
-            style={{
-              left: dragPos.x,
-              top: dragPos.y,
-              transform: "translate(-50%, -50%)",
-            }}
+            style={{ left: dragPos.x, top: dragPos.y, transform: "translate(-50%, -50%)" }}
           >
             <div
               style={{
-                transform: `rotate(${rotation + 15}deg) scale(${
-                  dragPos.y < shoreY ? 1.12 : 1
-                })`,
+                transform: `rotate(${rotation + 15}deg) scale(${dragPos.y < shoreY ? 1.12 : 1})`,
                 transition: "transform 0.15s ease",
                 filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))",
               }}
             >
-              <GlassBottle size={2.8} hasNote />
+              <GlassBottle size={2.8} hasNote bottleColor={bottleColor} paperStyle={paperStyle} />
             </div>
           </div>
         </div>

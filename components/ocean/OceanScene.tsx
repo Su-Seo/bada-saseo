@@ -31,13 +31,14 @@ function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
-function createBottle(messageId: string): BottleData {
+function createBottle(messageId: string, bottleColor?: string | null): BottleData {
   return {
     id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     messageId,
     x: rand(10, 84),
     xDrift: rand(-45, 45),
     duration: rand(20, 30),
+    bottleColor: bottleColor ?? null,
   };
 }
 
@@ -170,13 +171,13 @@ export default function OceanScene() {
   const shoreY = viewH * SHORE_PCT;
 
   // ── 바다 병 추가 / 제거 ────────────────────────────
-  const addBottle = useCallback((messageId: string) => {
+  const addBottle = useCallback((messageId: string, bottleColor?: string | null) => {
     setBottles((prev) => {
       if (prev.length >= MAX_BOTTLES) {
         queueRef.current.push(messageId);
         return prev;
       }
-      return [...prev, createBottle(messageId)];
+      return [...prev, createBottle(messageId, bottleColor)];
     });
   }, []);
 
@@ -208,11 +209,12 @@ export default function OceanScene() {
           messageId?: string;
           createdAt?: string;
           since?: string;
+          bottleColor?: string | null;
         };
 
         if (data.type === "bottle" && data.messageId) {
           if (data.createdAt) since = data.createdAt;
-          addBottle(data.messageId);
+          addBottle(data.messageId, data.bottleColor);
           setTodayCount((n) => (n !== null ? n + 1 : 1));
         }
 
@@ -251,10 +253,10 @@ export default function OceanScene() {
   useEffect(() => {
     fetch("/api/messages/ambient")
       .then((r) => r.json())
-      .then((data: { messages?: { id: string }[] }) => {
+      .then((data: { messages?: { id: string; bottleColor?: string | null }[] }) => {
         if (!data.messages) return;
         data.messages.slice(0, 4).forEach((msg, i) => {
-          setTimeout(() => addBottle(msg.id), i * 2200);
+          setTimeout(() => addBottle(msg.id, msg.bottleColor), i * 2200);
         });
       })
       .catch(() => {});
@@ -276,13 +278,16 @@ export default function OceanScene() {
   }, []);
 
   // ── 해변 병 던지기 (API 호출) ────────────────────────
-  const handleBeachThrow = useCallback((_bottleId: string, content: string) => {
-    fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    }).catch(() => {});
-  }, []);
+  const handleBeachThrow = useCallback(
+    (_bottleId: string, content: string, bottleColor: string, paperStyle: string, tag: string | null) => {
+      fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, bottleColor, paperStyle, tag }),
+      }).catch(() => {});
+    },
+    []
+  );
 
   const handleBeachRemove = useCallback((bottleId: string) => {
     setBeachBottles((prev) => prev.filter((b) => b.id !== bottleId));
