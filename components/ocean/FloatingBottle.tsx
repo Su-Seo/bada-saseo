@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import GlassBottle from "./GlassBottle";
 
 export interface BottleData {
   id: string;
@@ -73,11 +74,8 @@ export default function FloatingBottle({
       whileHover={arrived ? { scale: 1.18, transition: { duration: 0.2 } } : undefined}
       onClick={() => onClick({ messageId: bottle.messageId, bottleId: bottle.id })}
     >
-      <div
-        className={arrived ? "bottle-arrived" : "bottle-drifting"}
-        style={{ fontSize: "2.4rem" }}
-      >
-        🍾
+      <div className={arrived ? "bottle-arrived" : "bottle-drifting"}>
+        <GlassBottle size={2.4} hasNote />
       </div>
       {arrived && (
         <motion.p

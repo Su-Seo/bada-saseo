@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MAX_LENGTH } from "@/lib/constants";
+import GlassBottle from "./GlassBottle";
 
 interface Props {
   id: string;
@@ -107,13 +108,13 @@ export default function BeachBottle({
         animate={{
           scale: 0.1,
           opacity: 0,
-          y: horizonY - throwData.y, // 수평선 방향 (위쪽)
+          y: horizonY - throwData.y,
           rotate: 60,
         }}
         transition={{ duration: 1.4, ease: [0.15, 0.75, 0.35, 1] }}
         onAnimationComplete={() => onRemove(id)}
       >
-        <span className="text-4xl">🍾</span>
+        <GlassBottle size={2.8} hasNote />
       </motion.div>
     );
   }
@@ -146,15 +147,8 @@ export default function BeachBottle({
               }
               style={{ transform: `rotate(${rotation}deg)` }}
             >
-              🍾
+              <GlassBottle size={2.2} hasNote={state === "filled"} />
             </span>
-
-            {/* 편지가 담겨있음 표시 */}
-            {state === "filled" && (
-              <span className="absolute -top-2 -right-2 text-[0.75rem] drop-shadow-sm">
-                📜
-              </span>
-            )}
           </div>
 
           {/* 드래그 힌트 */}
@@ -279,8 +273,7 @@ export default function BeachBottle({
               transform: "translate(-50%, -50%)",
             }}
           >
-            <span
-              className="text-4xl block"
+            <div
               style={{
                 transform: `rotate(${rotation + 15}deg) scale(${
                   dragPos.y < shoreY ? 1.12 : 1
@@ -289,14 +282,8 @@ export default function BeachBottle({
                 filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))",
               }}
             >
-              🍾
-            </span>
-            <span
-              className="absolute -top-2 right-0 text-sm"
-              style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.4))" }}
-            >
-              📜
-            </span>
+              <GlassBottle size={2.8} hasNote />
+            </div>
           </div>
         </div>
       )}

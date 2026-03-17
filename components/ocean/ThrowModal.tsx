@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MessageInput from "@/components/ui/MessageInput";
+import GlassBottle from "./GlassBottle";
 
 type Stage = "write" | "throwing" | "done";
 
@@ -91,7 +92,7 @@ export default function ThrowModal({ onClose }: Props) {
                 disabled={!content.trim()}
                 className="w-full py-3 rounded-2xl bg-white/20 border border-white/30 text-white text-sm tracking-widest hover:bg-white/30 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                유리병에 넣어 던지기 🍾
+                유리병에 넣어 던지기
               </button>
 
               <button
@@ -111,8 +112,7 @@ export default function ThrowModal({ onClose }: Props) {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-4 py-10"
             >
-              <motion.span
-                className="text-5xl"
+              <motion.div
                 animate={{
                   x: [0, 40, 120],
                   y: [0, -60, -160],
@@ -121,8 +121,8 @@ export default function ThrowModal({ onClose }: Props) {
                 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               >
-                🍾
-              </motion.span>
+                <GlassBottle size={3.2} hasNote />
+              </motion.div>
               <p className="text-sm text-white/50 tracking-wider">
                 바다로 던지는 중...
               </p>

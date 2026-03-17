@@ -6,6 +6,7 @@ import FloatingBottle, { BottleData } from "./FloatingBottle";
 import BeachBottle from "./BeachBottle";
 import ThrowModal from "./ThrowModal";
 import PickModal from "./PickModal";
+import GlassBottle from "./GlassBottle";
 
 // ── 씬 비율 상수 ──────────────────────────────────────
 const HORIZON_PCT = 0.37;
@@ -335,7 +336,38 @@ export default function OceanScene() {
       />
 
       {/* ────────────────────────────────────────────
-          레이어 5: 표류 중인 유리병들 (바다)
+          레이어 5a: 바다 표면 파도결 (수평 물결)
+      ──────────────────────────────────────────── */}
+      <div
+        className="absolute w-full pointer-events-none overflow-hidden"
+        style={{
+          top: `${HORIZON_PCT * 100 + 2}%`,
+          height: `${(SHORE_PCT - HORIZON_PCT) * 100 - 4}%`,
+          zIndex: 4,
+        }}
+      >
+        {/* 파도결 레이어들 - 각각 다른 속도/크기로 이동 */}
+        <div className="ocean-ripple-layer ocean-ripple-1" />
+        <div className="ocean-ripple-layer ocean-ripple-2" />
+        <div className="ocean-ripple-layer ocean-ripple-3" />
+      </div>
+
+      {/* ────────────────────────────────────────────
+          레이어 5b: 바다 표면 빛 반짝임
+      ──────────────────────────────────────────── */}
+      <div
+        className="absolute pointer-events-none ocean-shimmer"
+        style={{
+          top: `${HORIZON_PCT * 100 + 5}%`,
+          left: "5%",
+          width: "90%",
+          height: `${(SHORE_PCT - HORIZON_PCT) * 100 - 8}%`,
+          zIndex: 5,
+        }}
+      />
+
+      {/* ────────────────────────────────────────────
+          레이어 5c: 표류 중인 유리병들 (바다)
       ──────────────────────────────────────────── */}
       <AnimatePresence>
         {bottles.map((bottle) => (
@@ -351,35 +383,128 @@ export default function OceanScene() {
       </AnimatePresence>
 
       {/* ────────────────────────────────────────────
-          레이어 6: 해안 파도 SVG
+          레이어 6: 해안 파도 (멀티 레이어)
       ──────────────────────────────────────────── */}
+      {/* 먼 파도 (수평선 쪽) */}
       <svg
         className="absolute w-full pointer-events-none"
         style={{
-          top: `${SHORE_PCT * 100 - 3.5}%`,
-          height: "7%",
-          zIndex: 22,
+          top: `${SHORE_PCT * 100 - 6}%`,
+          height: "5%",
+          zIndex: 19,
+        }}
+        viewBox="0 0 1440 60"
+        preserveAspectRatio="none"
+      >
+        <path
+          className="animate-shore-wave-far"
+          fill="rgba(10, 35, 65, 0.35)"
+          d="M0,30 C180,22 360,38 540,30 C720,22 900,38 1080,30 C1260,22 1440,30 1440,30 L1440,60 L0,60 Z"
+        />
+      </svg>
+
+      {/* 중간 파도 */}
+      <svg
+        className="absolute w-full pointer-events-none"
+        style={{
+          top: `${SHORE_PCT * 100 - 3.8}%`,
+          height: "6%",
+          zIndex: 21,
         }}
         viewBox="0 0 1440 80"
         preserveAspectRatio="none"
       >
         <path
           className="animate-shore-wave-back"
-          fill="rgba(12, 45, 85, 0.6)"
+          fill="rgba(8, 30, 58, 0.55)"
           d="M0,35 C360,50 720,20 1080,35 C1260,43 1380,28 1440,35 L1440,80 L0,80 Z"
         />
         <path
           className="animate-shore-wave-front"
-          fill="rgba(8, 35, 70, 0.7)"
+          fill="rgba(6, 24, 50, 0.65)"
           d="M0,50 C240,38 480,62 720,50 C960,38 1200,62 1440,50 L1440,80 L0,80 Z"
         />
-        {/* 거품 하이라이트 */}
+      </svg>
+
+      {/* 가장 앞 파도 + 포말 */}
+      <svg
+        className="absolute w-full pointer-events-none"
+        style={{
+          top: `${SHORE_PCT * 100 - 1.5}%`,
+          height: "4.5%",
+          zIndex: 23,
+        }}
+        viewBox="0 0 1440 50"
+        preserveAspectRatio="none"
+      >
+        {/* 파도 몸체 */}
         <path
-          className="animate-shore-wave-front"
-          fill="rgba(160,190,220,0.08)"
-          d="M0,48 C240,36 480,60 720,48 C960,36 1200,60 1440,48 L1440,53 L0,53 Z"
+          className="animate-shore-wave-near"
+          fill="rgba(6, 22, 45, 0.7)"
+          d="M0,18 C120,12 240,24 360,18 C480,12 600,24 720,18 C840,12 960,24 1080,18 C1200,12 1320,24 1440,18 L1440,50 L0,50 Z"
+        />
+        {/* 포말 (흰 거품) */}
+        <path
+          className="animate-shore-wave-near"
+          fill="rgba(180,210,235,0.09)"
+          d="M0,16 C120,10 240,22 360,16 C480,10 600,22 720,16 C840,10 960,22 1080,16 C1200,10 1320,22 1440,16 L1440,20 L0,20 Z"
         />
       </svg>
+
+      {/* ────────────────────────────────────────────
+          레이어 6b: 파도 치기 (밀려왔다 빠지기)
+      ──────────────────────────────────────────── */}
+      <div
+        className="absolute w-full pointer-events-none overflow-hidden"
+        style={{
+          top: `${BEACH_PCT * 100 - 3}%`,
+          height: "10%",
+          zIndex: 25,
+        }}
+      >
+        {/* 3개의 파도가 시간차로 밀려옴 */}
+        <div className="wave-wash wave-wash-1" />
+        <div className="wave-wash wave-wash-2" />
+        <div className="wave-wash wave-wash-3" />
+      </div>
+
+      {/* ────────────────────────────────────────────
+          레이어 6c: 젖은 모래 (바다-모래 전환 구간)
+      ──────────────────────────────────────────── */}
+      <div
+        className="absolute w-full pointer-events-none"
+        style={{
+          top: `${BEACH_PCT * 100}%`,
+          height: "5%",
+          zIndex: 3,
+          background: `linear-gradient(180deg,
+            rgba(30, 25, 15, 0.9) 0%,
+            rgba(45, 35, 20, 0.6) 40%,
+            transparent 100%
+          )`,
+        }}
+      />
+      {/* 젖은 모래 광택 */}
+      <div
+        className="absolute w-full pointer-events-none wet-sand-sheen"
+        style={{
+          top: `${BEACH_PCT * 100}%`,
+          height: "3%",
+          zIndex: 4,
+        }}
+      />
+
+      {/* ────────────────────────────────────────────
+          레이어 6d: 모래 텍스처
+      ──────────────────────────────────────────── */}
+      <div
+        className="absolute w-full pointer-events-none sand-grain"
+        style={{
+          top: `${BEACH_PCT * 100}%`,
+          bottom: 0,
+          zIndex: 2,
+        }}
+      />
 
       {/* ────────────────────────────────────────────
           레이어 7: 해변 유리병들 (빈 병 → 메모 → 봉인 → 드래그)
@@ -409,7 +534,7 @@ export default function OceanScene() {
         aria-label="고민 던지기"
         title="고민 던지기"
       >
-        <span className="text-lg">🍾</span>
+        <GlassBottle size={1.4} />
         <span
           className="text-white/50 tracking-wider"
           style={{ fontSize: "0.55rem", writingMode: "vertical-rl" }}
