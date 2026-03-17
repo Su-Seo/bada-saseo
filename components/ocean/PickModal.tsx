@@ -7,6 +7,7 @@ import MessageCard from "@/components/ui/MessageCard";
 interface Message {
   id: string;
   content: string;
+  tag?: string | null;
   heartCount: number;
 }
 
@@ -79,6 +80,7 @@ export default function PickModal({ messageId, onClose }: Props) {
           <MessageCard
             id={message.id}
             content={message.content}
+            tag={message.tag}
             heartCount={message.heartCount}
             onClose={onClose}
           />

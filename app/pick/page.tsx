@@ -6,12 +6,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import OceanBackground from "@/components/animations/OceanBackground";
 import BottlePick from "@/components/animations/BottlePick";
 import MessageCard from "@/components/ui/MessageCard";
+import { TAGS, Tag } from "@/lib/constants";
 
 type Stage = "idle" | "floating" | "open" | "empty";
 
 interface Message {
   id: string;
   content: string;
+  tag?: string | null;
   heartCount: number;
 }
 
@@ -19,9 +21,13 @@ export default function PickPage() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("idle");
   const [message, setMessage] = useState<Message | null>(null);
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
 
   const handlePickBottle = async () => {
-    const res = await fetch("/api/messages/random");
+    const url = selectedTag
+      ? `/api/messages/random?tag=${encodeURIComponent(selectedTag)}`
+      : "/api/messages/random";
+    const res = await fetch(url);
     const data = await res.json();
 
     if (!data.message) {
@@ -65,11 +71,29 @@ export default function PickPage() {
                 </p>
               </div>
 
+              {/* 태그 필터 */}
+              <div className="flex flex-wrap justify-center gap-1.5">
+                {TAGS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setSelectedTag(selectedTag === t ? null : t)}
+                    className={`px-2.5 py-1 rounded-full text-xs transition-all border ${
+                      selectedTag === t
+                        ? "bg-white/30 border-white/50 text-white"
+                        : "bg-white/5 border-white/15 text-white/40 hover:bg-white/15 hover:text-white/70"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
               <button
                 onClick={handlePickBottle}
                 className="w-full py-4 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 text-white text-sm tracking-widest hover:bg-white/25 transition-all active:scale-95"
               >
-                유리병 줍기 🍾
+                {selectedTag ? `#${selectedTag} 편지 줍기 🍾` : "유리병 줍기 🍾"}
               </button>
 
               <button
@@ -107,6 +131,7 @@ export default function PickPage() {
               <MessageCard
                 id={message.id}
                 content={message.content}
+                tag={message.tag}
                 heartCount={message.heartCount}
                 onClose={handleClose}
               />

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import MessageInput from "@/components/ui/MessageInput";
 import GlassBottle from "./GlassBottle";
+import { TAGS, Tag } from "@/lib/constants";
 
 type Stage = "write" | "throwing" | "done";
 
@@ -13,6 +14,7 @@ interface Props {
 
 export default function ThrowModal({ onClose }: Props) {
   const [content, setContent] = useState("");
+  const [tag, setTag] = useState<Tag | null>(null);
   const [stage, setStage] = useState<Stage>("write");
   const [error, setError] = useState("");
 
@@ -26,7 +28,7 @@ export default function ThrowModal({ onClose }: Props) {
     const res = await fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, tag }),
     });
 
     if (!res.ok) {
@@ -75,6 +77,24 @@ export default function ThrowModal({ onClose }: Props) {
                 <p className="text-xs text-white/30">
                   던지는 순간 내 화면에서 사라집니다
                 </p>
+              </div>
+
+              {/* 태그 선택 */}
+              <div className="flex flex-wrap gap-1.5">
+                {TAGS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTag(tag === t ? null : t)}
+                    className={`px-2.5 py-1 rounded-full text-xs transition-all border ${
+                      tag === t
+                        ? "bg-white/30 border-white/50 text-white"
+                        : "bg-white/5 border-white/15 text-white/40 hover:bg-white/15 hover:text-white/70"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
               </div>
 
               <MessageInput

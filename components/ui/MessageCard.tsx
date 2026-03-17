@@ -6,11 +6,12 @@ import { useState } from "react";
 interface Props {
   id: string;
   content: string;
+  tag?: string | null;
   heartCount: number;
   onClose: () => void;
 }
 
-export default function MessageCard({ id, content, heartCount, onClose }: Props) {
+export default function MessageCard({ id, content, tag, heartCount, onClose }: Props) {
   const [hearted, setHearted] = useState(false);
   const [reported, setReported] = useState(false);
   const [currentHearts, setCurrentHearts] = useState(heartCount);
@@ -37,9 +38,16 @@ export default function MessageCard({ id, content, heartCount, onClose }: Props)
       className="w-full max-w-md bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 text-white shadow-xl"
     >
       {/* 편지지 느낌 헤더 */}
-      <p className="text-xs text-white/40 mb-4 text-center tracking-widest uppercase">
-        바다에서 건져낸 편지
-      </p>
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <p className="text-xs text-white/40 tracking-widest uppercase">
+          바다에서 건져낸 편지
+        </p>
+        {tag && (
+          <span className="px-2 py-0.5 rounded-full text-xs bg-white/15 border border-white/20 text-white/60">
+            {tag}
+          </span>
+        )}
+      </div>
 
       <p className="text-sm leading-relaxed whitespace-pre-wrap break-words min-h-[80px]">
         {content}
