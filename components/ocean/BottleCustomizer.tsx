@@ -97,11 +97,6 @@ export default function BottleCustomizer({ value, onChange, size = "md" }: Props
                       }
                 }
               >
-                {!isCustomColor && (
-                  <span className="text-white/80 font-bold leading-none" style={{ fontSize: "0.55rem" }}>
-                    +
-                  </span>
-                )}
                 <input
                   ref={colorInputRef}
                   type="color"

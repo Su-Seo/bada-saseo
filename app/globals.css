@@ -290,6 +290,31 @@
 }
 
 /* ══════════════════════════════════════════════
+   햇빛 바다 반사 글리터
+   ══════════════════════════════════════════════ */
+
+.sun-sparkle {
+  position: absolute;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.90)  0%,
+    rgba(255, 252, 235, 0.45) 40%,
+    rgba(255, 248, 215, 0.10) 70%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  animation: sun-sparkle-flash var(--duration, 2.8s) ease-in-out var(--delay, 0s) infinite;
+}
+
+@keyframes sun-sparkle-flash {
+  0%,  100% { opacity: 0; }
+  25%        { opacity: 0.15; }
+  50%        { opacity: 0.55; }
+  75%        { opacity: 0.25; }
+  90%        { opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════
    포말 엣지 (파도-모래 경계)
    ══════════════════════════════════════════════ */
 

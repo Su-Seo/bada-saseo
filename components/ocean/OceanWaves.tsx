@@ -7,9 +7,49 @@ import { HORIZON_PCT, SHORE_PCT, BEACH_PCT } from "./constants";
 interface Props {
   theme: OceanTheme;
   waveColors: ReturnType<typeof getWaveColors>;
+  sunPos: { x: number; y: number } | null;
 }
 
-export default function OceanWaves({ theme, waveColors }: Props) {
+// xRel: 반사 기둥 중심 기준 정규화 오프셋 (-1 ~ 1)
+// 실제 x = sunPos.x + xRel * (3 + y * 0.18)  → 수평선에서 수렴, 해안에서 퍼짐
+// y: 바다 영역 내 수직 위치 (0~100%), w/h: px, delay/duration: s
+const SUN_SPARKLES: { xRel: number; y: number; w: number; h: number; delay: number; duration: number }[] = [
+  // 수평선 근처 (y 3~28)
+  { xRel: -0.5, y:  4, w:  9, h: 1, delay: 0.0, duration: 2.5 },
+  { xRel:  0.8, y:  7, w:  7, h: 1, delay: 1.4, duration: 3.0 },
+  { xRel: -0.2, y: 11, w: 10, h: 1, delay: 2.8, duration: 2.8 },
+  { xRel:  0.5, y: 15, w:  8, h: 1, delay: 0.6, duration: 2.6 },
+  { xRel: -0.9, y: 18, w:  7, h: 1, delay: 3.5, duration: 2.9 },
+  { xRel:  0.2, y: 22, w:  9, h: 1, delay: 1.8, duration: 2.7 },
+  { xRel: -0.6, y: 26, w:  8, h: 1, delay: 2.2, duration: 3.1 },
+  { xRel:  0.9, y: 10, w:  6, h: 1, delay: 0.9, duration: 2.5 },
+  { xRel: -0.3, y:  5, w:  8, h: 1, delay: 4.0, duration: 3.0 },
+  { xRel:  0.6, y: 20, w:  9, h: 1, delay: 3.0, duration: 2.8 },
+  // 중간 (y 30~62)
+  { xRel: -0.7, y: 33, w: 13, h: 1, delay: 0.4, duration: 3.2 },
+  { xRel:  0.3, y: 38, w: 15, h: 1, delay: 2.6, duration: 3.5 },
+  { xRel: -0.1, y: 43, w: 14, h: 1, delay: 1.2, duration: 3.3 },
+  { xRel:  0.8, y: 48, w: 12, h: 1, delay: 3.8, duration: 3.0 },
+  { xRel: -0.9, y: 52, w: 13, h: 1, delay: 1.0, duration: 3.4 },
+  { xRel:  0.5, y: 57, w: 15, h: 1, delay: 2.4, duration: 3.2 },
+  { xRel: -0.4, y: 35, w: 12, h: 1, delay: 4.2, duration: 3.1 },
+  { xRel:  0.1, y: 44, w: 14, h: 1, delay: 1.7, duration: 3.5 },
+  { xRel: -0.8, y: 55, w: 13, h: 1, delay: 3.2, duration: 3.3 },
+  { xRel:  0.7, y: 40, w: 11, h: 1, delay: 0.7, duration: 3.0 },
+  { xRel: -0.5, y: 60, w: 14, h: 1, delay: 2.0, duration: 3.4 },
+  // 해안 근처 (y 65~90)
+  { xRel: -0.6, y: 65, w: 20, h: 2, delay: 0.5, duration: 3.8 },
+  { xRel:  0.4, y: 70, w: 22, h: 2, delay: 3.0, duration: 4.2 },
+  { xRel: -0.2, y: 75, w: 24, h: 2, delay: 1.5, duration: 4.0 },
+  { xRel:  0.9, y: 80, w: 21, h: 2, delay: 4.0, duration: 4.3 },
+  { xRel: -0.8, y: 85, w: 23, h: 2, delay: 0.8, duration: 3.9 },
+  { xRel:  0.2, y: 90, w: 26, h: 2, delay: 3.4, duration: 4.1 },
+  { xRel: -0.5, y: 68, w: 20, h: 2, delay: 2.0, duration: 4.0 },
+  { xRel:  0.7, y: 78, w: 22, h: 2, delay: 1.2, duration: 4.2 },
+  { xRel: -0.3, y: 88, w: 24, h: 2, delay: 4.4, duration: 4.3 },
+];
+
+export default function OceanWaves({ theme, waveColors, sunPos }: Props) {
   return (
     <>
       {/* ── 바다 표면 파도결 ── */}
@@ -46,6 +86,39 @@ export default function OceanWaves({ theme, waveColors }: Props) {
           zIndex: 5,
         }}
       />
+
+      {/* ── 햇빛 바다 반사 글리터 ── */}
+      {theme.sunOpacity > 0.25 && sunPos && (
+        <div
+          className="absolute w-full pointer-events-none overflow-hidden"
+          style={{
+            top: `${HORIZON_PCT * 100 + 1}%`,
+            height: `${(SHORE_PCT - HORIZON_PCT) * 100 - 2}%`,
+            zIndex: 6,
+            opacity: Math.min(theme.sunOpacity * 1.1, 1),
+          }}
+        >
+          {SUN_SPARKLES.map((s, i) => {
+            // 수평선에서 수렴(±8%), 해안에서 퍼짐(±38%)
+            const bandHalf = 8 + s.y * 0.30;
+            const x = Math.max(1, Math.min(99, sunPos.x + s.xRel * bandHalf));
+            return (
+              <div
+                key={i}
+                className="sun-sparkle"
+                style={{
+                  left: `${x}%`,
+                  top: `${s.y}%`,
+                  width: `${s.w}px`,
+                  height: `${s.h}px`,
+                  "--delay": `${s.delay}s`,
+                  "--duration": `${s.duration}s`,
+                } as React.CSSProperties}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* ── 해안 파도 (먼 파도) ── */}
       <svg

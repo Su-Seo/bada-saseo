@@ -62,7 +62,7 @@ export default function OceanScene() {
       <OceanSky theme={theme} stars={stars} sunPos={sunPos} />
 
       {/* 레이어 5a-6b: 바다 파도 */}
-      <OceanWaves theme={theme} waveColors={waveColors} />
+      <OceanWaves theme={theme} waveColors={waveColors} sunPos={sunPos} />
 
       {/* 레이어 5c: 표류 중인 유리병들 */}
       <AnimatePresence>
