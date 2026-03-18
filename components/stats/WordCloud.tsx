@@ -1,68 +1,178 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { WordEntry } from "@/lib/wordFrequency";
+
+interface PlacedWord {
+  word: string;
+  count: number;
+  x: number;
+  y: number;
+  fontSize: number;
+  rotate: number;
+  color: string;
+}
+
+interface BBox {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+const COLORS = [
+  "#7dd3fc", "#67e8f9", "#5eead4",
+  "#c4b5fd", "#d8b4fe", "#fda4af",
+  "#6ee7b7", "#93c5fd", "#fde68a",
+  "#f9a8d4", "#86efac", "#fdba74",
+];
+
+const PAD = 5;
+
+function bboxOverlaps(a: BBox, boxes: BBox[]): boolean {
+  for (const b of boxes) {
+    if (
+      a.x1 - PAD < b.x2 &&
+      a.x2 + PAD > b.x1 &&
+      a.y1 - PAD < b.y2 &&
+      a.y2 + PAD > b.y1
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function measureWord(text: string, fontSize: number): { w: number; h: number } {
+  try {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    ctx.font = `600 ${fontSize}px Geist, sans-serif`;
+    return { w: ctx.measureText(text).width + 4, h: fontSize * 1.2 };
+  } catch {
+    return { w: text.length * fontSize * 0.6, h: fontSize * 1.2 };
+  }
+}
+
+function layout(words: WordEntry[], W: number, H: number): PlacedWord[] {
+  const max = words[0].count;
+  const min = words[words.length - 1].count;
+  const spread = Math.max(max - min, 1);
+
+  const cx = W / 2;
+  const cy = H / 2;
+  const boxes: BBox[] = [];
+  const result: PlacedWord[] = [];
+
+  for (let i = 0; i < words.length; i++) {
+    const { word, count } = words[i];
+    const t = (count - min) / spread;
+    const fontSize = Math.round(12 + t * 28); // 12px ~ 40px
+
+    // 상위 단어는 항상 가로, 나머지는 30% 확률로 세로
+    const rotate = i < 4 ? 0 : Math.random() < 0.3 ? 90 : 0;
+
+    const { w: tw, h: th } = measureWord(word, fontSize);
+    // 회전 시 bounding box 교환
+    const bw = rotate === 90 ? th : tw;
+    const bh = rotate === 90 ? tw : th;
+
+    // 아르키메데스 나선으로 배치 위치 탐색
+    let placed = false;
+    for (let step = 0; step < 4000; step++) {
+      const angle = step * 0.22;
+      const r = step * 0.65;
+      const px = cx + r * Math.cos(angle);
+      const py = cy + r * Math.sin(angle) * 0.55; // 타원형 (가로 넓게)
+
+      const box: BBox = {
+        x1: px - bw / 2,
+        y1: py - bh / 2,
+        x2: px + bw / 2,
+        y2: py + bh / 2,
+      };
+
+      if (box.x1 < 2 || box.x2 > W - 2 || box.y1 < 2 || box.y2 > H - 2) continue;
+
+      if (!bboxOverlaps(box, boxes)) {
+        boxes.push(box);
+        result.push({
+          word,
+          count,
+          x: px,
+          y: py,
+          fontSize,
+          rotate,
+          color: COLORS[i % COLORS.length],
+        });
+        placed = true;
+        break;
+      }
+    }
+
+    // 자리를 못 찾으면 스킵
+    void placed;
+  }
+
+  return result;
+}
 
 interface Props {
   words: WordEntry[];
 }
 
-const WORD_COLORS = [
-  "text-sky-300",
-  "text-cyan-300",
-  "text-teal-300",
-  "text-violet-300",
-  "text-purple-300",
-  "text-rose-300",
-  "text-pink-300",
-  "text-amber-300",
-  "text-emerald-300",
-  "text-blue-300",
-];
-
 export default function WordCloud({ words }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [placed, setPlaced] = useState<PlacedWord[]>([]);
+  const [svgH, setSvgH] = useState(0);
+
+  useEffect(() => {
+    if (words.length === 0) return;
+
+    const run = () => {
+      const el = ref.current;
+      if (!el) return;
+      const W = el.offsetWidth;
+      if (W === 0) {
+        requestAnimationFrame(run);
+        return;
+      }
+      const H = Math.max(Math.round(W * 0.62), 260);
+      setSvgH(H);
+      setPlaced(layout(words, W, H));
+    };
+
+    run();
+  }, [words]);
+
   if (words.length === 0) {
-    return (
-      <p className="text-white/40 text-sm text-center py-8">아직 편지가 없어요.</p>
-    );
+    return <p className="text-white/40 text-sm text-center py-8">아직 편지가 없어요.</p>;
   }
-
-  const max = words[0].count;
-  const min = words[words.length - 1].count;
-  const range = Math.max(max - min, 1);
-
-  // 빈도에 따라 폰트 크기 계산 (0.75rem ~ 2.25rem)
-  function fontSize(count: number): string {
-    const t = (count - min) / range;
-    const size = 0.75 + t * 1.5;
-    return `${size.toFixed(2)}rem`;
-  }
-
-  // 빈도에 따라 불투명도 계산
-  function opacity(count: number): number {
-    const t = (count - min) / range;
-    return 0.45 + t * 0.55;
-  }
-
-  // 단어마다 고정 색상 (인덱스 기반)
-  function color(i: number): string {
-    return WORD_COLORS[i % WORD_COLORS.length];
-  }
-
-  // 가독성을 위해 빈도 순 대신 셔플해서 표시
-  const shuffled = [...words].sort(() => Math.random() - 0.5);
 
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-3 justify-center leading-none">
-      {shuffled.map((entry, i) => (
-        <span
-          key={entry.word}
-          className={`${color(i)} font-medium transition-opacity`}
-          style={{ fontSize: fontSize(entry.count), opacity: opacity(entry.count) }}
-          title={`${entry.count}회`}
-        >
-          {entry.word}
-        </span>
-      ))}
+    <div ref={ref} className="w-full">
+      {svgH > 0 && (
+        <svg width="100%" height={svgH}>
+          {placed.map((p) => (
+            <text
+              key={p.word}
+              x={p.x}
+              y={p.y}
+              fontSize={p.fontSize}
+              fill={p.color}
+              fontWeight={600}
+              fontFamily="Geist, sans-serif"
+              textAnchor="middle"
+              dominantBaseline="central"
+              transform={p.rotate !== 0 ? `rotate(${p.rotate}, ${p.x}, ${p.y})` : undefined}
+              opacity={0.85}
+            >
+              <title>{p.word} ({p.count}회)</title>
+              {p.word}
+            </text>
+          ))}
+        </svg>
+      )}
     </div>
   );
 }
