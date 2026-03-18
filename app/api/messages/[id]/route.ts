@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { MESSAGE_SELECT, toMessageData } from "@/lib/message";
 
 export async function GET(
   _req: NextRequest,
@@ -9,12 +10,12 @@ export async function GET(
 
   const message = await prisma.message.findUnique({
     where: { id, isDeleted: false },
-    select: { id: true, content: true, tag: true, bottleColor: true, paperStyle: true, heartCount: true },
+    select: MESSAGE_SELECT,
   });
 
   if (!message) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ message });
+  return NextResponse.json({ message: toMessageData(message) });
 }

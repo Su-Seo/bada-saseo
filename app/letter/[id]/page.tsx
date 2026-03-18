@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import LetterView from "./LetterView";
+import { MESSAGE_SELECT, toMessageData } from "@/lib/message";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -19,11 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "바다사서" };
   }
 
+  const tagName = message.tag?.name;
   const description = message.content.slice(0, 100);
   const ogImageUrl = `/api/og/${id}`;
 
   return {
-    title: message.tag ? `${message.tag.name} — 바다사서` : "바다사서",
+    title: tagName ? `${tagName} — 바다사서` : "바다사서",
     description,
     openGraph: {
       title: "바다사서 — 바다에서 건져낸 편지",
@@ -44,11 +46,10 @@ export default async function LetterPage({ params }: Props) {
 
   const message = await prisma.message.findUnique({
     where: { id, isDeleted: false, expiresAt: { gt: new Date() } },
-    select: { id: true, content: true, tag: { select: { name: true } }, bottleColor: true, paperStyle: true, heartCount: true },
+    select: MESSAGE_SELECT,
   });
 
   if (!message) notFound();
 
-  const { tag: tagRel, ...rest } = message;
-  return <LetterView message={{ ...rest, tag: tagRel?.name ?? null }} />;
+  return <LetterView message={toMessageData(message)} />;
 }

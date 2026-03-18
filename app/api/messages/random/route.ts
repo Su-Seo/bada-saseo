@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { MESSAGE_SELECT, toMessageData } from "@/lib/message";
 
 export async function GET(req: NextRequest) {
   const tagParam = req.nextUrl.searchParams.get("tag");
@@ -33,18 +34,10 @@ export async function GET(req: NextRequest) {
   const message = await prisma.message.findFirst({
     where,
     skip,
-    select: {
-      id: true,
-      content: true,
-      tag: { select: { name: true } },
-      bottleColor: true,
-      paperStyle: true,
-      heartCount: true,
-      createdAt: true,
-    },
+    select: MESSAGE_SELECT,
   });
 
-  // 응답에서 tag를 이름 문자열로 플랫화
-  const { tag: tagRel, ...rest } = message!;
-  return NextResponse.json({ message: { ...rest, tag: tagRel?.name ?? null } }, { status: 200 });
+  return NextResponse.json({
+    message: message ? toMessageData(message) : null,
+  });
 }
