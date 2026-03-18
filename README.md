@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 바다사서
 
-## Getting Started
+바다에 메시지를 담은 유리병을 띄우고 다른 사람의 메시지를 건져올리는 서비스입니다.
 
-First, run the development server:
+## 기술 스택
+
+- **프레임워크**: Next.js (App Router)
+- **데이터베이스**: PostgreSQL (Supabase)
+- **ORM**: Prisma
+- **배포**: Vercel
+
+## 로컬 개발 환경 설정
+
+### 1. 의존성 설치
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 로컬 Supabase 실행
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+로컬 개발에는 Docker 기반의 Supabase를 사용합니다. `supabase/config.toml`에 로컬 환경 설정이 정의되어 있습니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Supabase CLI 설치 (최초 1회)
+brew install supabase/tap/supabase
 
-## Learn More
+# 로컬 Supabase 시작
+supabase start
 
-To learn more about Next.js, take a look at the following resources:
+# 중지
+supabase stop
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+시작 후 아래 서비스가 실행됩니다:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| 서비스 | URL |
+|--------|-----|
+| API | http://127.0.0.1:54321 |
+| Studio (DB 관리 UI) | http://127.0.0.1:54323 |
+| Database | postgresql://postgres:postgres@127.0.0.1:54322/postgres |
 
-## Deploy on Vercel
+### 3. 환경 변수 설정
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`.env` 파일을 생성하고 로컬 Supabase DB 연결 정보를 입력합니다:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+DIRECT_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+CRON_SECRET="your-secret"
+```
+
+### 4. DB 스키마 동기화
+
+```bash
+npx prisma db push
+```
+
+### 5. 개발 서버 실행
+
+```bash
+pnpm dev
+```
+
+http://localhost:3000 에서 확인할 수 있습니다.
+
+## 배포
+
+Vercel에 배포되며, 프로덕션 환경에서는 Supabase 클라우드의 PostgreSQL을 사용합니다.
