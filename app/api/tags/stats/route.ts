@@ -1,17 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { validMessageWhere } from "@/lib/message";
+import { validMessageWhere, findActiveTags } from "@/lib/message";
 
 export const revalidate = 60; // 1분 캐시
 
 /** GET /api/tags/stats — 태그별 메시지 수 */
 export async function GET() {
   const [tags, grouped] = await Promise.all([
-    prisma.tag.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
-      select: { id: true, name: true },
-    }),
+    findActiveTags(),
     prisma.message.groupBy({
       by: ["tagId"],
       where: { ...validMessageWhere(), tagId: { not: null } },

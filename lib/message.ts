@@ -36,6 +36,15 @@ export async function findValidMessage(id: string) {
   });
 }
 
+/** 활성 태그 목록 조회 (정렬순) */
+export function findActiveTags() {
+  return prisma.tag.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, name: true },
+  });
+}
+
 /** 태그 이름으로 활성 태그 ID 조회 */
 export async function resolveTagId(tagName: string | null | undefined): Promise<string | null> {
   if (!tagName) return null;
