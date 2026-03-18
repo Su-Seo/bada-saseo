@@ -7,6 +7,7 @@ import { useBeachCompose } from "./hooks/useBeachCompose";
 import GlassBottle from "./GlassBottle";
 import BottleCustomizer from "./BottleCustomizer";
 import BeachThrowAnimation from "./BeachThrowAnimation";
+import BeachBreakAnimation from "./BeachBreakAnimation";
 
 interface Props {
   id: string;
@@ -56,16 +57,26 @@ export default function BeachBottle({
     if (e.clientY < shoreY) {
       setThrowData({ x: e.clientX, y: e.clientY });
       const ok = await compose.submit();
-      if (!ok) {
-        // 에러 발생 — 던지기 취소, compose.error에 메시지 표시됨
-        setThrowData(null);
-        return;
-      }
+      if (!ok) return; // throwData 유지 — broken 상태에서 BeachBreakAnimation이 사용
       onThrow(id);
     } else {
       setDragPos(null);
     }
   };
+
+  // ── 깨지기 애니메이션 ──
+  if (compose.state === "broken" && throwData) {
+    // 0.9s 비행 후 깨지므로, easing [0.15, 0.75, 0.35, 1] 특성상 약 80% 지점에 위치
+    const breakY = throwData.y + (horizonY - throwData.y) * 0.8;
+    return (
+      <BeachBreakAnimation
+        throwX={throwData.x}
+        throwY={breakY}
+        errorMessage={compose.breakError}
+        onComplete={() => { compose.reset(); onRemove(id); }}
+      />
+    );
+  }
 
   // ── 던지기 애니메이션 ──
   if (compose.state === "throwing" && throwData) {

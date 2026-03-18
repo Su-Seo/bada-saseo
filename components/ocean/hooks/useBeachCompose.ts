@@ -6,13 +6,14 @@ import { validateMessageContent } from "@/lib/validation";
 import { DEFAULT_COMPOSE_OPTIONS } from "@/lib/types";
 import type { ComposeOptions } from "@/lib/types";
 
-type State = "empty" | "writing" | "filled" | "throwing";
+type State = "empty" | "writing" | "filled" | "throwing" | "broken";
 
 export function useBeachCompose() {
   const [state, setState] = useState<State>("empty");
   const [content, setContent] = useState("");
   const [options, setOptions] = useState<ComposeOptions>(DEFAULT_COMPOSE_OPTIONS);
   const [error, setError] = useState("");
+  const [breakError, setBreakError] = useState("");
 
   const open = () => {
     if (state === "empty") setState("writing");
@@ -31,6 +32,15 @@ export function useBeachCompose() {
   const cancel = () => {
     setContent("");
     setError("");
+    setBreakError("");
+    setOptions(DEFAULT_COMPOSE_OPTIONS);
+    setState("empty");
+  };
+
+  const reset = () => {
+    setContent("");
+    setError("");
+    setBreakError("");
     setOptions(DEFAULT_COMPOSE_OPTIONS);
     setState("empty");
   };
@@ -38,10 +48,13 @@ export function useBeachCompose() {
   /** 던지기 실행 — 에러 시 false 반환 + 에러 상태 설정 */
   const submit = async (): Promise<boolean> => {
     setState("throwing");
-    const result = await postMessage(content, options);
+    const [result] = await Promise.all([
+      postMessage(content, options),
+      new Promise((r) => setTimeout(r, 900)), // 최소 비행 시간 보장
+    ]);
     if (!result.ok) {
-      setError(result.error ?? "전송에 실패했습니다.");
-      setState("filled");
+      setBreakError(result.error ?? "전송에 실패했습니다.");
+      setState("broken");
       return false;
     }
     return true;
@@ -58,9 +71,11 @@ export function useBeachCompose() {
     options,
     updateOptions,
     error,
+    breakError,
     open,
     seal,
     cancel,
+    reset,
     submit,
   };
 }
