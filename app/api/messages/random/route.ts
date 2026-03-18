@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { MESSAGE_SELECT, toMessageData, validMessageWhere } from "@/lib/message";
+import { MESSAGE_SELECT, toMessageData, validMessageWhere, resolveTagId } from "@/lib/message";
 
 export async function GET(req: NextRequest) {
   const tagParam = req.nextUrl.searchParams.get("tag");
 
   // DB에서 태그 유효성 확인 → tagId로 필터
-  let tagId: string | null = null;
-  if (tagParam) {
-    const found = await prisma.tag.findFirst({
-      where: { name: tagParam, isActive: true },
-      select: { id: true },
-    });
-    tagId = found?.id ?? null;
-  }
+  const tagId = await resolveTagId(tagParam);
 
   const where = {
     ...validMessageWhere(),

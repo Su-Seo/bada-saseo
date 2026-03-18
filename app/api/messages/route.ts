@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { containsBadWords } from "@/lib/filter";
+import { resolveTagId } from "@/lib/message";
 import { MAX_LENGTH, EXPIRE_DAYS, BOTTLE_COLORS, PAPER_STYLES } from "@/lib/constants";
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -15,14 +16,7 @@ export async function POST(req: NextRequest) {
   const content = body.content.trim();
 
   // 태그: DB에서 유효성 확인 → tagId로 저장
-  let tagId: string | null = null;
-  if (body.tag && typeof body.tag === "string") {
-    const found = await prisma.tag.findFirst({
-      where: { name: body.tag, isActive: true },
-      select: { id: true },
-    });
-    tagId = found?.id ?? null;
-  }
+  const tagId = await resolveTagId(typeof body.tag === "string" ? body.tag : null);
 
   // 병 색상: 프리셋 이름 또는 #rrggbb hex
   const bottleColor: string | null =

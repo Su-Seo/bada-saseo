@@ -1,4 +1,5 @@
 import type { Prisma } from "@/app/generated/prisma";
+import { prisma } from "./db";
 import type { MessageData } from "./types";
 
 /** 삭제되지 않고 만료되지 않은 유효한 메시지 필터 */
@@ -26,4 +27,14 @@ type RawMessage = Prisma.MessageGetPayload<{ select: typeof MESSAGE_SELECT }>;
 export function toMessageData(raw: RawMessage): MessageData & { createdAt: Date } {
   const { tag, ...rest } = raw;
   return { ...rest, tag: tag?.name ?? null };
+}
+
+/** 태그 이름으로 활성 태그 ID 조회 */
+export async function resolveTagId(tagName: string | null | undefined): Promise<string | null> {
+  if (!tagName) return null;
+  const found = await prisma.tag.findFirst({
+    where: { name: tagName, isActive: true },
+    select: { id: true },
+  });
+  return found?.id ?? null;
 }
