@@ -7,6 +7,7 @@ import {
   PAPER_STYLES,
   BOTTLE_COLOR_MAP,
   PAPER_STYLE_MAP,
+  HEX_COLOR_RE,
 } from "@/lib/constants";
 import type { ComposeOptions } from "@/lib/types";
 import GlassBottle from "./GlassBottle";
@@ -19,8 +20,6 @@ interface Props {
   size?: "sm" | "md";
 }
 
-const HEX_RE = /^#[0-9a-fA-F]{6}$/;
-
 export default function BottleCustomizer({ value, onChange, size = "md" }: Props) {
   const isSm = size === "sm";
   const { tags, loading: tagsLoading } = useTags();
@@ -32,13 +31,13 @@ export default function BottleCustomizer({ value, onChange, size = "md" }: Props
   const tagPx     = isSm ? "px-1.5" : "px-2";
   const tagTxt    = isSm ? "text-[0.5rem]" : "text-[0.6rem]";
 
-  const isCustomColor = HEX_RE.test(value.bottleColor as string);
+  const isCustomColor = HEX_COLOR_RE.test(value.bottleColor as string);
 
   // 현재 선택된 병 색상 프리뷰용 CSS 색상
   function bottleSwatchColor(c: string): string {
     const preset = BOTTLE_COLOR_MAP[c as keyof typeof BOTTLE_COLOR_MAP];
     if (preset) return `rgba(${preset.r},${preset.g},${preset.b},0.85)`;
-    if (HEX_RE.test(c)) return c;
+    if (HEX_COLOR_RE.test(c)) return c;
     return "transparent";
   }
 

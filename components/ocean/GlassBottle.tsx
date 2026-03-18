@@ -1,6 +1,6 @@
 "use client";
 
-import { BottleColor, PaperStyle, BOTTLE_COLOR_MAP, PAPER_STYLE_MAP } from "@/lib/constants";
+import { BottleColor, PaperStyle, BOTTLE_COLOR_MAP, PAPER_STYLE_MAP, HEX_COLOR_RE } from "@/lib/constants";
 
 interface Props {
   size?: number;
@@ -23,7 +23,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
 
 function buildBottleGradient(color: BottleColor | string | null | undefined) {
   const base =
-    (color && /^#[0-9a-fA-F]{6}$/.test(color)
+    (color && HEX_COLOR_RE.test(color)
       ? hexToRgb(color)
       : BOTTLE_COLOR_MAP[(color as BottleColor) ?? "초록"]) ?? BOTTLE_COLOR_MAP["초록"];
   const { r, g, b } = base;

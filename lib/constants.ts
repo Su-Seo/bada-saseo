@@ -1,6 +1,7 @@
 export const MAX_LENGTH = 500;
 export const EXPIRE_DAYS = 7;
 export const REPORT_THRESHOLD = 3;
+export const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 
 /** 서버-사이드 검증 / 시드용 기본 태그 목록 — UI 태그는 /api/tags 에서 로드 */
 export const FALLBACK_TAGS = ["연애", "진로", "가족", "친구", "건강", "일상", "기타"] as const;

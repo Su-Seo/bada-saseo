@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { containsBadWords } from "@/lib/filter";
 import { resolveTagId } from "@/lib/message";
-import { MAX_LENGTH, EXPIRE_DAYS, BOTTLE_COLORS, PAPER_STYLES } from "@/lib/constants";
-
-const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+import { MAX_LENGTH, EXPIRE_DAYS, BOTTLE_COLORS, PAPER_STYLES, HEX_COLOR_RE } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -22,7 +20,7 @@ export async function POST(req: NextRequest) {
   const bottleColor: string | null =
     body.bottleColor &&
     ((BOTTLE_COLORS as readonly string[]).includes(body.bottleColor) ||
-      HEX_RE.test(body.bottleColor))
+      HEX_COLOR_RE.test(body.bottleColor))
       ? body.bottleColor
       : null;
 
