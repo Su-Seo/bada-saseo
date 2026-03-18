@@ -20,9 +20,9 @@ export function playBottlePop(): void {
   audio.play().catch(() => {});
 }
 
-export function playBreakingGlass(): void {
+export function playBreakingBottle(): void {
   if (typeof window === "undefined" || !_sfxEnabled) return;
-  const audio = new Audio("/sounds/broken-glass.mp3");
+  const audio = new Audio("/sounds/broken-bottle.mp3");
   audio.volume = _sfxVolume * 0.5;
   audio.currentTime = 0.3; // mp3 앞부분 묵음 구간 스킵
   audio.play().catch(() => {});

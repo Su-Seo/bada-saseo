@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { playBreakingGlass } from "@/lib/sounds";
+import { playBreakingBottle } from "@/lib/sounds";
 
 interface Props {
   throwX: number;
@@ -32,7 +32,7 @@ export default function BeachBreakAnimation({ throwX, throwY, errorMessage, onCo
 
   useEffect(() => {
     if (!isPlayingSound) {
-      playBreakingGlass();
+      playBreakingBottle();
       setIsPlayingSound(true);
     }
     const t = setTimeout(onComplete, 2600);
