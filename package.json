@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
+    "@prisma/client-runtime-utils": "^7.5.0",
     "bad-words": "^4.0.0",
     "framer-motion": "^12.36.0",
     "howler": "^2.2.4",
