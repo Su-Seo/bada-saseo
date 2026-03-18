@@ -253,17 +253,23 @@ export function buildGradient(
     /* 수평선 */
     ${rgb(t.horizon)} ${h}%,
     /* 수평선 → 바다 전환 */
-    ${rgbMix(t.horizon, t.oceanTop, 0.7)} ${h + 2}%,
-    /* 바다 상단 */
-    ${rgbMix(t.oceanTop, t.oceanBottom, 0.25)} ${h + 10}%,
+    ${rgbMix(t.horizon, t.oceanTop, 0.5)} ${h + 1}%,
+    /* 바다 상단 (먼 바다) */
+    ${rgb(t.oceanTop)} ${h + 4}%,
+    /* 바다 상단 → 중단 */
+    ${rgbMix(t.oceanTop, t.oceanBottom, 0.2)} ${h + 10}%,
     /* 바다 중단 */
-    ${rgbMix(t.oceanTop, t.oceanBottom, 0.55)} ${h + 18}%,
+    ${rgbMix(t.oceanTop, t.oceanBottom, 0.4)} ${h + 16}%,
+    /* 바다 중하단 */
+    ${rgbMix(t.oceanTop, t.oceanBottom, 0.6)} ${s - 4}%,
     /* 바다 하단 */
-    ${rgb(t.oceanBottom)} ${s - 5}%,
+    ${rgbMix(t.oceanTop, t.oceanBottom, 0.9)} ${s - 2}%,
+    /* 바다 가장 깊은 곳 */
+    ${rgb(t.oceanBottom)} ${s}%,
     /* 바다 → 젖은 모래 전환 */
-    ${rgbMix(t.oceanBottom, t.wetSand, 0.4)} ${s - 1}%,
+    ${rgbMix(t.oceanBottom, t.wetSand, 0.3)} ${s + 1}%,
     /* 젖은 모래 */
-    ${rgb(t.wetSand)} ${s + 1}%,
+    ${rgbMix(t.oceanBottom, t.wetSand, 0.7)} ${s + 3}%,
     /* 마른 모래 시작 */
     ${rgb(t.sandLight)} ${b}%,
     /* 모래 상단 */
@@ -282,27 +288,29 @@ export function buildGradient(
 // ── 파도 색상 헬퍼 ────────────────────────────────────
 
 export function getWaveColors(t: OceanTheme) {
+  const far = lerpRGB(t.oceanTop, t.oceanBottom, 0.3);
+  const mid = lerpRGB(t.oceanTop, t.oceanBottom, 0.55);
+  const near = lerpRGB(t.oceanTop, t.oceanBottom, 0.75);
   const dark = t.oceanBottom;
-  const mid = lerpRGB(t.oceanTop, t.oceanBottom, 0.6);
+  const foam = lerpRGB(t.oceanTop, [220, 235, 248] as RGB, 0.6);
   const isBright = t.sunOpacity > 0.5;
 
   if (isBright) {
-    // 낮: 해변 파도는 자연스럽게, 포말만 살짝
     return {
-      farFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.30)`,
-      backFill: `rgba(${mid[0]},${mid[1]},${mid[2]},0.40)`,
-      frontFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.50)`,
-      nearFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.55)`,
-      foamFill: `rgba(235,248,255,0.30)`,
+      farFill: `rgba(${far[0]},${far[1]},${far[2]},0.28)`,
+      backFill: `rgba(${mid[0]},${mid[1]},${mid[2]},0.38)`,
+      frontFill: `rgba(${near[0]},${near[1]},${near[2]},0.48)`,
+      nearFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.52)`,
+      foamFill: `rgba(${foam[0]},${foam[1]},${foam[2]},0.28)`,
     };
   }
 
   return {
-    farFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.35)`,
-    backFill: `rgba(${mid[0]},${mid[1]},${mid[2]},0.55)`,
-    frontFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.65)`,
-    nearFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.7)`,
-    foamFill: `rgba(${Math.min(dark[0] + 170, 255)},${Math.min(dark[1] + 180, 255)},${Math.min(dark[2] + 185, 255)},0.09)`,
+    farFill: `rgba(${far[0]},${far[1]},${far[2]},0.32)`,
+    backFill: `rgba(${mid[0]},${mid[1]},${mid[2]},0.50)`,
+    frontFill: `rgba(${near[0]},${near[1]},${near[2]},0.60)`,
+    nearFill: `rgba(${dark[0]},${dark[1]},${dark[2]},0.65)`,
+    foamFill: `rgba(${foam[0]},${foam[1]},${foam[2]},0.08)`,
   };
 }
 

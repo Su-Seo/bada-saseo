@@ -59,7 +59,10 @@ export default function OceanWaves({ theme, waveColors, sunPos }: Props) {
           top: `${HORIZON_PCT * 100 + 2}%`,
           height: `${(SHORE_PCT - HORIZON_PCT) * 100 - 4}%`,
           zIndex: 4,
-        }}
+          "--ripple-r": theme.oceanBottom[0],
+          "--ripple-g": theme.oceanBottom[1],
+          "--ripple-b": theme.oceanBottom[2],
+        } as React.CSSProperties}
       >
         <div
           className="ocean-ripple-layer ocean-ripple-1"

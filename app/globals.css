@@ -215,9 +215,9 @@
     0deg,
     transparent 0px,
     transparent 30px,
-    rgba(30,80,140,0.055) 30px,
-    rgba(20,70,130,0.09) 32px,
-    rgba(30,80,140,0.055) 34px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.055) 30px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.09) 32px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.055) 34px,
     transparent 34px
   );
   animation: ripple-drift-slow 18s ease-in-out infinite alternate;
@@ -229,9 +229,9 @@
     0deg,
     transparent 0px,
     transparent 20px,
-    rgba(25,75,135,0.045) 20px,
-    rgba(18,65,125,0.075) 21.5px,
-    rgba(25,75,135,0.045) 23px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.045) 20px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.075) 21.5px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.045) 23px,
     transparent 23px
   );
   animation: ripple-drift-mid 12s ease-in-out infinite alternate-reverse;
@@ -243,9 +243,9 @@
     0deg,
     transparent 0px,
     transparent 13px,
-    rgba(28,78,138,0.038) 13px,
-    rgba(18,65,125,0.062) 14px,
-    rgba(28,78,138,0.038) 15px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.038) 13px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.062) 14px,
+    rgba(var(--ripple-r),var(--ripple-g),var(--ripple-b),0.038) 15px,
     transparent 15px
   );
   animation: ripple-drift-fast 8s ease-in-out infinite alternate;
