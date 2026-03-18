@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { MESSAGE_SELECT, toMessageData } from "@/lib/message";
+import { MESSAGE_SELECT, toMessageData, validMessageWhere } from "@/lib/message";
 
 export async function GET(req: NextRequest) {
   const tagParam = req.nextUrl.searchParams.get("tag");
@@ -16,8 +16,7 @@ export async function GET(req: NextRequest) {
   }
 
   const where = {
-    isDeleted: false,
-    expiresAt: { gt: new Date() },
+    ...validMessageWhere(),
     ...(tagId ? { tagId } : {}),
   };
 

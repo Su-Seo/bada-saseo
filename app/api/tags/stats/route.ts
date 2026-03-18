@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { validMessageWhere } from "@/lib/message";
 
 export const revalidate = 60; // 1분 캐시
 
@@ -13,7 +14,7 @@ export async function GET() {
     }),
     prisma.message.groupBy({
       by: ["tagId"],
-      where: { isDeleted: false, expiresAt: { gt: new Date() }, tagId: { not: null } },
+      where: { ...validMessageWhere(), tagId: { not: null } },
       _count: { _all: true },
     }),
   ]);

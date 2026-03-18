@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import LetterView from "./LetterView";
-import { MESSAGE_SELECT, toMessageData } from "@/lib/message";
+import { MESSAGE_SELECT, toMessageData, validMessageWhere } from "@/lib/message";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LetterPage({ params }: Props) {
   const { id } = await params;
 
-  const message = await prisma.message.findUnique({
-    where: { id, isDeleted: false, expiresAt: { gt: new Date() } },
+  const message = await prisma.message.findFirst({
+    where: { id, ...validMessageWhere() },
     select: MESSAGE_SELECT,
   });
 
