@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MAX_BEACH_BOTTLES, BEACH_SPAWN_MS } from "../constants";
+import { MAX_BEACH_BOTTLES, BEACH_SPAWN_MS, rand, uid } from "../constants";
 
 export interface BeachBottleItem {
   id: string;
@@ -10,13 +10,9 @@ export interface BeachBottleItem {
   rotation: number;
 }
 
-function rand(min: number, max: number) {
-  return min + Math.random() * (max - min);
-}
-
 function createBeachBottle(): BeachBottleItem {
   return {
-    id: `bb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    id: uid("bb"),
     x: rand(6, 86),
     y: rand(3, 19),
     rotation: rand(-35, 12),

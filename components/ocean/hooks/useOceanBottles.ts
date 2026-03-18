@@ -2,16 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BottleData } from "../FloatingBottle";
-import { MAX_BOTTLES } from "../constants";
+import { MAX_BOTTLES, rand, uid } from "../constants";
 import { fetchJSON } from "@/lib/api";
-
-function rand(min: number, max: number) {
-  return min + Math.random() * (max - min);
-}
 
 function createBottle(messageId: string, bottleColor?: string | null): BottleData {
   return {
-    id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: uid("b"),
     messageId,
     x: rand(10, 84),
     xDrift: rand(-45, 45),
