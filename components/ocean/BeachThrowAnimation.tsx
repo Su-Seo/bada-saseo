@@ -24,12 +24,13 @@ export default function BeachThrowAnimation({
   onComplete,
 }: Props) {
   const [showSplash, setShowSplash] = useState(false);
+  const arriveY = (horizonY - throwY) * 0.85;
 
   useEffect(() => {
     const t = setTimeout(() => {
       setShowSplash(true);
       playSplash();
-    }, 1050);
+    }, 750);
     return () => clearTimeout(t);
   }, []);
 
@@ -39,7 +40,12 @@ export default function BeachThrowAnimation({
         className="fixed z-[85] pointer-events-none"
         style={{ left: throwX, top: throwY, translateX: "-50%", translateY: "-50%" }}
         initial={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
-        animate={{ scale: 0.1, opacity: 0, y: horizonY - throwY, rotate: 60 }}
+        animate={{ 
+          scale: 0.3, // 너무 작아지지 않게 scale도 조정 (0.1 -> 0.3)
+          opacity: 0, 
+          y: arriveY,
+          rotate: 40 
+        }}
         transition={{ duration: 1.4, ease: [0.15, 0.75, 0.35, 1] }}
         onAnimationComplete={onComplete}
       >
@@ -51,7 +57,7 @@ export default function BeachThrowAnimation({
           <motion.div
             key="splash"
             className="fixed z-[86] pointer-events-none"
-            style={{ left: throwX, top: horizonY, translateX: "-50%", translateY: "-50%" }}
+            style={{ left: throwX, top: throwY + arriveY, translateX: "-50%", translateY: "-50%" }}
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
             transition={{ duration: 1.1, delay: 0.45 }}
