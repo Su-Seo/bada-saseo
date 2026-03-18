@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MAX_BEACH_BOTTLES, BEACH_SPAWN_MS, rand, uid } from "../constants";
+import { MAX_BEACH_BOTTLES, BEACH_SPAWN_MS } from "../constants";
+import { rand, uid } from "../utils";
 
 export interface BeachBottleItem {
   id: string;
