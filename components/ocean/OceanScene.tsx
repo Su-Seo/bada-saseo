@@ -17,6 +17,7 @@ import { useOceanBottles } from "./hooks/useOceanBottles";
 import { useBeachBottles } from "./hooks/useBeachBottles";
 import SoundToggle from "@/components/SoundToggle";
 import ThemeToggle from "./ThemeToggle";
+import StatsModal from "./StatsModal";
 
 export default function OceanScene() {
   const { themeMode, setThemeMode, theme, gradient, waveColors, sunPos } = useOceanTheme();
@@ -27,6 +28,7 @@ export default function OceanScene() {
 
   const [throwOpen, setThrowOpen] = useState(false);
   const [pickMessageId, setPickMessageId] = useState<string | null>(null);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   const isDaytime = theme.sunOpacity > 0.5;
   const txt = getTextClasses(isDaytime);
@@ -116,12 +118,14 @@ export default function OceanScene() {
         <SoundToggle isDaytime={isDaytime} />
       </div>
 
-      {/* ── UI: 오늘 통계 ── */}
+      {/* ── UI: 오늘 통계 (클릭 → 통계 모달) ── */}
       {todayCount !== null && (
-        <div
-          className={`fixed bottom-5 right-5 z-40 pointer-events-none text-right px-2.5 py-1.5 rounded-xl transition-colors ${
-            isDaytime ? "bg-black/25 backdrop-blur-sm" : ""
+        <button
+          className={`fixed bottom-5 right-5 z-40 text-right px-2.5 py-1.5 rounded-xl transition-all active:scale-95 ${
+            isDaytime ? "bg-black/25 backdrop-blur-sm hover:bg-black/35" : "hover:bg-white/8"
           }`}
+          onClick={() => setStatsOpen(true)}
+          aria-label="통계 보기"
         >
           <p className={`${txt.faint} tracking-wider`} style={{ fontSize: "0.65rem" }}>
             오늘 바다에 던져진 마음
@@ -132,7 +136,7 @@ export default function OceanScene() {
           >
             {todayCount.toLocaleString()}개
           </p>
-        </div>
+        </button>
       )}
 
       {/* ── UI: 빈 바다 안내 ── */}
@@ -159,6 +163,7 @@ export default function OceanScene() {
         {pickMessageId && (
           <PickModal key="pick" messageId={pickMessageId} onClose={() => setPickMessageId(null)} />
         )}
+        {statsOpen && <StatsModal key="stats" onClose={() => setStatsOpen(false)} />}
       </AnimatePresence>
     </div>
   );

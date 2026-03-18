@@ -2,6 +2,7 @@ import type { Prisma } from "@/app/generated/prisma";
 import { prisma } from "./db";
 import type { MessageData } from "./types";
 import { EXPIRE_DAYS, REPORT_THRESHOLD } from "./constants";
+import { computeWordFrequency } from "./wordFrequency";
 
 /** 삭제되지 않고 만료되지 않은 유효한 메시지 필터 */
 export function validMessageWhere(): Prisma.MessageWhereInput {
@@ -148,21 +149,42 @@ export async function reportMessage(id: string): Promise<boolean> {
 
 // ─── 통계/정리 ──────────────────────────────────────────
 
-/** 오늘/전체 유효 메시지 수 */
+/** 오늘/전체 유효 메시지 수, 평균 하트 수 */
 export async function getMessageStats() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const [todayCount, totalCount] = await Promise.all([
+  const [todayCount, totalCount, heartAgg] = await Promise.all([
     prisma.message.count({
       where: { ...validMessageWhere(), createdAt: { gte: todayStart } },
     }),
     prisma.message.count({
       where: validMessageWhere(),
     }),
+    prisma.message.aggregate({
+      where: validMessageWhere(),
+      _avg: { heartCount: true },
+      _sum: { heartCount: true },
+    }),
   ]);
 
-  return { todayCount, totalCount };
+  return {
+    todayCount,
+    totalCount,
+    totalHearts: heartAgg._sum.heartCount ?? 0,
+    avgHeart: Math.round((heartAgg._avg.heartCount ?? 0) * 10) / 10,
+  };
+}
+
+/** 유효 메시지 단어 빈도 (단어 클라우드용, 최신 500개 기준) */
+export async function getWordFrequency(limit = 60) {
+  const messages = await prisma.message.findMany({
+    where: validMessageWhere(),
+    select: { content: true },
+    orderBy: { createdAt: "desc" },
+    take: 500,
+  });
+  return computeWordFrequency(messages.map((m) => m.content), limit);
 }
 
 /** 태그별 메시지 수 통계 */
