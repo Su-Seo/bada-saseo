@@ -85,8 +85,8 @@ export default function BottleCustomizer({ value, onChange, size = "md" }: Props
               {/* 커스텀 색상 피커 (맨 마지막) */}
               <label
                 title="직접 색상 선택"
-                className={`${dotCls} rounded-full transition-all border-2 cursor-pointer flex items-center justify-center overflow-hidden relative ${
-                  isCustomColor ? "border-white/80 scale-125" : "border-white/20"
+                className={`${dotCls} rounded-full transition-all cursor-pointer flex items-center justify-center overflow-hidden relative ring-2 ${
+                  isCustomColor ? "ring-white/80 ring-3" : "ring-white/20"
                 }`}
                 style={
                   isCustomColor
