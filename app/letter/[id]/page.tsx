@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const message = await prisma.message.findUnique({
     where: { id, isDeleted: false },
-    select: { content: true, tag: true },
+    select: { content: true, tag: { select: { name: true } } },
   });
 
   if (!message) {
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `/api/og/${id}`;
 
   return {
-    title: message.tag ? `${message.tag} — 바다사서` : "바다사서",
+    title: message.tag ? `${message.tag.name} — 바다사서` : "바다사서",
     description,
     openGraph: {
       title: "바다사서 — 바다에서 건져낸 편지",
@@ -44,10 +44,11 @@ export default async function LetterPage({ params }: Props) {
 
   const message = await prisma.message.findUnique({
     where: { id, isDeleted: false, expiresAt: { gt: new Date() } },
-    select: { id: true, content: true, tag: true, bottleColor: true, paperStyle: true, heartCount: true },
+    select: { id: true, content: true, tag: { select: { name: true } }, bottleColor: true, paperStyle: true, heartCount: true },
   });
 
   if (!message) notFound();
 
-  return <LetterView message={message} />;
+  const { tag: tagRel, ...rest } = message;
+  return <LetterView message={{ ...rest, tag: tagRel?.name ?? null }} />;
 }

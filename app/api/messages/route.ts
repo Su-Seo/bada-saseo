@@ -14,14 +14,14 @@ export async function POST(req: NextRequest) {
 
   const content = body.content.trim();
 
-  // 태그: DB에서 유효성 확인
-  let tag: string | null = null;
+  // 태그: DB에서 유효성 확인 → tagId로 저장
+  let tagId: string | null = null;
   if (body.tag && typeof body.tag === "string") {
     const found = await prisma.tag.findFirst({
       where: { name: body.tag, isActive: true },
-      select: { name: true },
+      select: { id: true },
     });
-    tag = found?.name ?? null;
+    tagId = found?.id ?? null;
   }
 
   // 병 색상: 프리셋 이름 또는 #rrggbb hex
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   const expiresAt = new Date(Date.now() + EXPIRE_DAYS * 24 * 60 * 60 * 1000);
 
   await prisma.message.create({
-    data: { content, tag, bottleColor, paperStyle, expiresAt },
+    data: { content, tagId, bottleColor, paperStyle, expiresAt },
   });
 
   return NextResponse.json({ success: true }, { status: 201 });

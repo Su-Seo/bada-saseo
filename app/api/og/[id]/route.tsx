@@ -13,7 +13,7 @@ export async function GET(
 
   const message = await prisma.message.findUnique({
     where: { id, isDeleted: false },
-    select: { content: true, tag: true, paperStyle: true },
+    select: { content: true, tag: { select: { name: true } }, paperStyle: true },
   });
 
   if (!message) {
@@ -98,7 +98,7 @@ export async function GET(
                   padding: "4px 14px",
                 }}
               >
-                {message.tag}
+                {message.tag.name}
               </span>
             )}
           </div>

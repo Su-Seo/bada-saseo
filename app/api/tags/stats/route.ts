@@ -9,22 +9,22 @@ export async function GET() {
     prisma.tag.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
-      select: { name: true },
+      select: { id: true, name: true },
     }),
     prisma.message.groupBy({
-      by: ["tag"],
-      where: { isDeleted: false, expiresAt: { gt: new Date() }, tag: { not: null } },
+      by: ["tagId"],
+      where: { isDeleted: false, expiresAt: { gt: new Date() }, tagId: { not: null } },
       _count: { _all: true },
     }),
   ]);
 
   const countMap = Object.fromEntries(
-    grouped.map((g) => [g.tag as string, g._count._all])
+    grouped.map((g) => [g.tagId as string, g._count._all])
   );
 
   const stats = tags.map((t) => ({
     name: t.name,
-    count: countMap[t.name] ?? 0,
+    count: countMap[t.id] ?? 0,
   }));
 
   return NextResponse.json({ stats });

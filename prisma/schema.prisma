@@ -10,7 +10,8 @@ datasource db {
 model Message {
   id          String   @id @default(cuid())
   content     String   @db.VarChar(500)
-  tag         String?  @db.VarChar(20)
+  tagId       String?
+  tag         Tag?     @relation(fields: [tagId], references: [id])
   bottleColor String?  @db.VarChar(20)
   paperStyle  String?  @db.VarChar(20)
   heartCount  Int      @default(0)
@@ -21,15 +22,16 @@ model Message {
 
   @@index([expiresAt])
   @@index([isDeleted, expiresAt])
-  @@index([tag, isDeleted, expiresAt])
+  @@index([tagId, isDeleted, expiresAt])
 }
 
 model Tag {
-  id        String   @id @default(cuid())
-  name      String   @unique @db.VarChar(20)
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  name      String    @unique @db.VarChar(20)
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  messages  Message[]
 
   @@index([isActive, sortOrder])
 }
