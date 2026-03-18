@@ -5,6 +5,7 @@ import { postMessage } from "@/lib/api";
 import { validateMessageContent } from "@/lib/validation";
 import { DEFAULT_COMPOSE_OPTIONS } from "@/lib/types";
 import type { ComposeOptions } from "@/lib/types";
+import { SPLASH_DELAY_MS } from "@/components/ocean/constants";
 
 type State = "empty" | "writing" | "filled" | "throwing" | "broken";
 
@@ -50,7 +51,7 @@ export function useBeachCompose() {
     setState("throwing");
     const [result] = await Promise.all([
       postMessage(content, options),
-      new Promise((r) => setTimeout(r, 900)), // 최소 비행 시간 보장
+      new Promise((r) => setTimeout(r, SPLASH_DELAY_MS - 150)), // 최소 비행 시간 보장
     ]);
     if (!result.ok) {
       setBreakError(result.error ?? "전송에 실패했습니다.");

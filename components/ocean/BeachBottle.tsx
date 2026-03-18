@@ -66,7 +66,7 @@ export default function BeachBottle({
 
   // ── 깨지기 애니메이션 ──
   if (compose.state === "broken" && throwData) {
-    // 0.9s 비행 후 깨지므로, easing [0.15, 0.75, 0.35, 1] 특성상 약 80% 지점에 위치
+    // 0.9s 비행 후 깨지므로, easing [0.15, 0.75, 0.35, 1] 특성상 약 80% 지점에 위치    
     const breakY = throwData.y + (horizonY - throwData.y) * 0.8;
     return (
       <BeachBreakAnimation

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { playBreakingBottle } from "@/lib/sounds";
+import { SPLASH_DELAY_MS } from "./constants";
 
 interface Props {
   throwX: number;
@@ -35,7 +36,7 @@ export default function BeachBreakAnimation({ throwX, throwY, errorMessage, onCo
       playBreakingBottle();
       setIsPlayingSound(true);
     }
-    const t = setTimeout(onComplete, 2600);
+    const t = setTimeout(onComplete, SPLASH_DELAY_MS + 500);
     return () => clearTimeout(t);
   }, [onComplete, isPlayingSound]);
 

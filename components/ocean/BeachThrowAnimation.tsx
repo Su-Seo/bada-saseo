@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { playSplash } from "@/lib/sounds";
 import GlassBottle from "./GlassBottle";
+import { SPLASH_DELAY_MS } from "./constants";
 
 interface Props {
   throwX: number;
@@ -30,7 +31,7 @@ export default function BeachThrowAnimation({
     const t = setTimeout(() => {
       setShowSplash(true);
       playSplash();
-    }, 750);
+    }, SPLASH_DELAY_MS);
     return () => clearTimeout(t);
   }, []);
 
