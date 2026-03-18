@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 서버 전용: 비속어 필터
-  if (containsBadWords(content)) {
+  if (await containsBadWords(content)) {
     return NextResponse.json(
       { error: "부적절한 표현이 포함되어 있습니다." },
       { status: 400 }

@@ -3,6 +3,7 @@ import { prisma } from "./db";
 import type { MessageData } from "./types";
 import { EXPIRE_DAYS, REPORT_THRESHOLD } from "./constants";
 import { computeWordFrequency } from "./wordFrequency";
+import { getStopwords } from "./wordList";
 
 /** 삭제되지 않고 만료되지 않은 유효한 메시지 필터 */
 export function validMessageWhere(): Prisma.MessageWhereInput {
@@ -184,7 +185,8 @@ export async function getWordFrequency(limit = 60) {
     orderBy: { createdAt: "desc" },
     take: 500,
   });
-  return computeWordFrequency(messages.map((m) => m.content), limit);
+  const stopwords = await getStopwords();
+  return computeWordFrequency(messages.map((m) => m.content), new Set(stopwords), limit);
 }
 
 /** 태그별 메시지 수 통계 */

@@ -35,3 +35,14 @@ model Tag {
 
   @@index([isActive, sortOrder])
 }
+
+model WordList {
+  id        String   @id @default(cuid())
+  type      String   @db.VarChar(20)   // "stopword" | "badword"
+  word      String   @db.VarChar(100)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([type, word])
+  @@index([type, isActive])
+}
