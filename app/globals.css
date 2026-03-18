@@ -303,6 +303,7 @@
     transparent 100%
   );
   border-radius: 50%;
+  opacity: 0;
   animation: sun-sparkle-flash var(--duration, 2.8s) ease-in-out var(--delay, 0s) infinite;
 }
 
