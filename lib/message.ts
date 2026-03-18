@@ -29,6 +29,13 @@ export function toMessageData(raw: RawMessage): MessageData & { createdAt: Date 
   return { ...rest, tag: tag?.name ?? null };
 }
 
+/** 유효한(삭제·만료되지 않은) 메시지인지 확인. 없으면 null 반환 */
+export async function findValidMessage(id: string) {
+  return prisma.message.findFirst({
+    where: { id, ...validMessageWhere() },
+  });
+}
+
 /** 태그 이름으로 활성 태그 ID 조회 */
 export async function resolveTagId(tagName: string | null | undefined): Promise<string | null> {
   if (!tagName) return null;

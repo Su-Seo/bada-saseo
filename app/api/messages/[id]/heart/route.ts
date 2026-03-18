@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { findValidMessage } from "@/lib/message";
 
 export async function POST(
   _req: NextRequest,
@@ -7,12 +8,7 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  const message = await prisma.message.findUnique({
-    where: { id },
-    select: { isDeleted: true, expiresAt: true },
-  });
-
-  if (!message || message.isDeleted || message.expiresAt < new Date()) {
+  if (!await findValidMessage(id)) {
     return NextResponse.json({ error: "메시지를 찾을 수 없습니다." }, { status: 404 });
   }
 
