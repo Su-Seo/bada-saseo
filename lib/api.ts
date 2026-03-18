@@ -1,5 +1,16 @@
 import type { ComposeOptions } from "./types";
 
+/** GET JSON 유틸 — 실패 시 null 반환 */
+export async function fetchJSON<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 /** 편지 작성 API 호출 — 전역 단일 정의 */
 export async function postMessage(
   content: string,

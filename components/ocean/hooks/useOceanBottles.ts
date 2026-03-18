@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BottleData } from "../FloatingBottle";
 import { MAX_BOTTLES } from "../constants";
+import { fetchJSON } from "@/lib/api";
 
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
@@ -94,25 +95,19 @@ export function useOceanBottles() {
 
   // ── 오늘 통계 로드 ────────────────────────────────
   useEffect(() => {
-    fetch("/api/stats")
-      .then((r) => r.json())
-      .then((data: { todayCount?: number }) => {
-        if (typeof data.todayCount === "number") setTodayCount(data.todayCount);
-      })
-      .catch(() => {});
+    fetchJSON<{ todayCount?: number }>("/api/stats").then((data) => {
+      if (typeof data?.todayCount === "number") setTodayCount(data.todayCount);
+    });
   }, []);
 
   // ── 앰비언트 병 ────────────────────────────────────
   useEffect(() => {
-    fetch("/api/messages/ambient")
-      .then((r) => r.json())
-      .then((data: { messages?: { id: string; bottleColor?: string | null }[] }) => {
-        if (!data.messages) return;
-        data.messages.slice(0, 4).forEach((msg, i) => {
-          setTimeout(() => addBottle(msg.id, msg.bottleColor), i * 2200);
-        });
-      })
-      .catch(() => {});
+    fetchJSON<{ messages?: { id: string; bottleColor?: string | null }[] }>("/api/messages/ambient").then((data) => {
+      if (!data?.messages) return;
+      data.messages.slice(0, 4).forEach((msg, i) => {
+        setTimeout(() => addBottle(msg.id, msg.bottleColor), i * 2200);
+      });
+    });
   }, [addBottle]);
 
   return { bottles, addBottle, removeBottle, todayCount };
