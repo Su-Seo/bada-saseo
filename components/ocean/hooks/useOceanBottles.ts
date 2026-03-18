@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BottleData } from "../FloatingBottle";
 import { MAX_BOTTLES } from "../constants";
-import { rand, uid } from "../utils";
+import { rand, uid } from "@/lib/utils";
 import { fetchJSON } from "@/lib/api";
 
 function createBottle(messageId: string, bottleColor?: string | null): BottleData {

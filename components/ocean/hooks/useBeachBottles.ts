@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { MAX_BEACH_BOTTLES, BEACH_SPAWN_MS } from "../constants";
-import { rand, uid } from "../utils";
+import { rand, uid } from "@/lib/utils";
 
 export interface BeachBottleItem {
   id: string;
