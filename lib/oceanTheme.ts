@@ -240,23 +240,41 @@ export function buildGradient(
   const b = beachPct * 100;
 
   return `linear-gradient(180deg,
+    /* 하늘 꼭대기 */
     ${rgb(t.skyTop)} 0%,
-    ${rgbMix(t.skyTop, t.skyBottom, 0.2)} 15%,
-    ${rgbMix(t.skyTop, t.skyBottom, 0.55)} 28%,
-    ${rgbMix(t.skyBottom, t.horizon, 0.3)} ${h - 3}%,
-    ${rgbMix(t.skyBottom, t.horizon, 0.7)} ${h - 1}%,
+    /* 하늘 상단 */
+    ${rgbMix(t.skyTop, t.skyBottom, 0.2)} ${h * 0.1}%,
+    /* 하늘 중단 */
+    ${rgbMix(t.skyTop, t.skyBottom, 0.55)} ${h * 0.4}%,
+    /* 하늘 하단 → 수평선 전환 시작 */
+    ${rgbMix(t.skyBottom, t.horizon, 0.3)} ${h - 8}%,
+    /* 수평선 직전 */
+    ${rgbMix(t.skyBottom, t.horizon, 0.7)} ${h - 4}%,
+    /* 수평선 */
     ${rgb(t.horizon)} ${h}%,
-    ${rgbMix(t.horizon, t.oceanTop, 0.6)} ${h + 3}%,
+    /* 수평선 → 바다 전환 */
+    ${rgbMix(t.horizon, t.oceanTop, 0.7)} ${h + 2}%,
+    /* 바다 상단 */
     ${rgbMix(t.oceanTop, t.oceanBottom, 0.25)} ${h + 10}%,
+    /* 바다 중단 */
     ${rgbMix(t.oceanTop, t.oceanBottom, 0.55)} ${h + 18}%,
-    ${rgb(t.oceanBottom)} ${s - 3}%,
-    ${rgbMix(t.oceanBottom, t.wetSand, 0.4)} ${s}%,
-    ${rgb(t.wetSand)} ${b - 0.2}%,
-    ${rgb(t.sandLight)} ${b + 0.4}%,
+    /* 바다 하단 */
+    ${rgb(t.oceanBottom)} ${s - 5}%,
+    /* 바다 → 젖은 모래 전환 */
+    ${rgbMix(t.oceanBottom, t.wetSand, 0.4)} ${s - 1}%,
+    /* 젖은 모래 */
+    ${rgb(t.wetSand)} ${s + 1}%,
+    /* 마른 모래 시작 */
+    ${rgb(t.sandLight)} ${b}%,
+    /* 모래 상단 */
     ${rgbMix(t.sandLight, t.sandDark, 0.2)} ${b + 3}%,
+    /* 모래 중단 */
     ${rgbMix(t.sandLight, t.sandDark, 0.5)} ${b + 10}%,
+    /* 모래 하단 */
     ${rgbMix(t.sandLight, t.sandDark, 0.7)} 85%,
+    /* 모래 깊은 곳 */
     ${rgbMix(t.sandLight, t.sandDark, 0.85)} 92%,
+    /* 모래 맨 아래 */
     ${rgb(t.sandDark)} 100%
   )`;
 }
