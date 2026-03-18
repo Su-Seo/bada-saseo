@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { deleteExpiredMessages } from "@/lib/message";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -8,11 +8,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await prisma.message.deleteMany({
-    where: {
-      expiresAt: { lt: new Date() },
-    },
-  });
+  const deleted = await deleteExpiredMessages();
 
-  return NextResponse.json({ deleted: result.count });
+  return NextResponse.json({ deleted });
 }

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { containsBadWords } from "@/lib/filter";
-import { resolveTagId } from "@/lib/message";
-import { MAX_LENGTH, EXPIRE_DAYS, BOTTLE_COLORS, PAPER_STYLES, HEX_COLOR_RE } from "@/lib/constants";
+import { createMessage, resolveTagId } from "@/lib/message";
+import { validateMessageContent } from "@/lib/validation";
+import { BOTTLE_COLORS, PAPER_STYLES, HEX_COLOR_RE } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -12,6 +12,20 @@ export async function POST(req: NextRequest) {
   }
 
   const content = body.content.trim();
+
+  // 공통 검증 (빈 값, 길이)
+  const validation = validateMessageContent(body.content);
+  if (!validation.ok) {
+    return NextResponse.json({ error: validation.error }, { status: 400 });
+  }
+
+  // 서버 전용: 비속어 필터
+  if (containsBadWords(content)) {
+    return NextResponse.json(
+      { error: "부적절한 표현이 포함되어 있습니다." },
+      { status: 400 }
+    );
+  }
 
   // 태그: DB에서 유효성 확인 → tagId로 저장
   const tagId = await resolveTagId(typeof body.tag === "string" ? body.tag : null);
@@ -30,29 +44,7 @@ export async function POST(req: NextRequest) {
       ? body.paperStyle
       : null;
 
-  if (content.length === 0) {
-    return NextResponse.json({ error: "내용을 입력해주세요." }, { status: 400 });
-  }
-
-  if (content.length > MAX_LENGTH) {
-    return NextResponse.json(
-      { error: `${MAX_LENGTH}자 이하로 작성해주세요.` },
-      { status: 400 }
-    );
-  }
-
-  if (containsBadWords(content)) {
-    return NextResponse.json(
-      { error: "부적절한 표현이 포함되어 있습니다." },
-      { status: 400 }
-    );
-  }
-
-  const expiresAt = new Date(Date.now() + EXPIRE_DAYS * 24 * 60 * 60 * 1000);
-
-  await prisma.message.create({
-    data: { content, tagId, bottleColor, paperStyle, expiresAt },
-  });
+  await createMessage({ content, tagId, bottleColor, paperStyle });
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

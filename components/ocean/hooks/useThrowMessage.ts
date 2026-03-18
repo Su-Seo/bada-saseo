@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { postMessage } from "@/lib/api";
+import { validateMessageContent } from "@/lib/validation";
 import { DEFAULT_COMPOSE_OPTIONS } from "@/lib/types";
 import type { ComposeOptions } from "@/lib/types";
 
@@ -15,8 +16,9 @@ export function useThrowMessage() {
 
   /** 검증 → API 호출 → "throwing" 단계 진입. 성공 여부를 반환 */
   const handleThrow = async (): Promise<boolean> => {
-    if (!content.trim()) {
-      setError("마음을 담아 적어주세요.");
+    const validation = validateMessageContent(content);
+    if (!validation.ok) {
+      setError(validation.error);
       return false;
     }
     setError("");

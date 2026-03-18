@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
-import { prisma } from "@/lib/db";
+import { findMessageById } from "@/lib/message";
 import { PAPER_STYLE_MAP, PaperStyle } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -11,10 +11,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const message = await prisma.message.findUnique({
-    where: { id, isDeleted: false },
-    select: { content: true, tag: { select: { name: true } }, paperStyle: true },
-  });
+  const message = await findMessageById(id);
 
   if (!message) {
     return new Response("Not found", { status: 404 });
@@ -98,7 +95,7 @@ export async function GET(
                   padding: "4px 14px",
                 }}
               >
-                {message.tag.name}
+                {message.tag}
               </span>
             )}
           </div>

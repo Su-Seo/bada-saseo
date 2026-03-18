@@ -1,28 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { validMessageWhere, findActiveTags } from "@/lib/message";
+import { getTagStats } from "@/lib/message";
 
 export const revalidate = 60; // 1분 캐시
 
 /** GET /api/tags/stats — 태그별 메시지 수 */
 export async function GET() {
-  const [tags, grouped] = await Promise.all([
-    findActiveTags(),
-    prisma.message.groupBy({
-      by: ["tagId"],
-      where: { ...validMessageWhere(), tagId: { not: null } },
-      _count: { _all: true },
-    }),
-  ]);
-
-  const countMap = Object.fromEntries(
-    grouped.map((g) => [g.tagId as string, g._count._all])
-  );
-
-  const stats = tags.map((t) => ({
-    name: t.name,
-    count: countMap[t.id] ?? 0,
-  }));
+  const stats = await getTagStats();
 
   return NextResponse.json({ stats });
 }

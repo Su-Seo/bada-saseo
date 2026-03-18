@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { findValidMessage } from "@/lib/message";
+import { findValidMessage, incrementHeart } from "@/lib/message";
 
 export async function POST(
   _req: NextRequest,
@@ -12,10 +11,7 @@ export async function POST(
     return NextResponse.json({ error: "메시지를 찾을 수 없습니다." }, { status: 404 });
   }
 
-  await prisma.message.update({
-    where: { id },
-    data: { heartCount: { increment: 1 } },
-  });
+  await incrementHeart(id);
 
   return NextResponse.json({ success: true });
 }

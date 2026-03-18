@@ -10,6 +10,7 @@ import OceanSky from "./OceanSky";
 import OceanWaves from "./OceanWaves";
 import OceanBeach from "./OceanBeach";
 import { useOceanTheme } from "./hooks/useOceanTheme";
+import { getTextClasses } from "@/lib/oceanTheme";
 import { useViewport } from "./hooks/useViewport";
 import { useStars } from "./hooks/useStars";
 import { useOceanBottles } from "./hooks/useOceanBottles";
@@ -28,16 +29,7 @@ export default function OceanScene() {
   const [pickMessageId, setPickMessageId] = useState<string | null>(null);
 
   const isDaytime = theme.sunOpacity > 0.5;
-  // 낮/밤 텍스트 색상 — 낮은 밝은 배경이라 opacity를 높여서 가시성 확보
-  const txt = {
-    faint:  isDaytime ? "text-white/70"  : "text-white/25",
-    dim:    isDaytime ? "text-white/80"  : "text-white/40",
-    mid:    isDaytime ? "text-white/90"  : "text-white/60",
-    bright: isDaytime ? "text-white"     : "text-white/90",
-    btn:    isDaytime ? "text-white/70 hover:text-white" : "text-white/30 hover:text-white/60",
-    btnActive: isDaytime ? "bg-black/20 text-white" : "bg-white/20 text-white/90",
-    btnBase:   isDaytime ? "hover:bg-black/10 hover:bg-black/15" : "hover:text-white/60 hover:bg-white/8",
-  };
+  const txt = getTextClasses(isDaytime);
 
   const handleBottleClick = useCallback(
     ({ messageId, bottleId }: { messageId: string; bottleId: string }) => {

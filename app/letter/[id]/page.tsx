@@ -1,31 +1,29 @@
+import { cache } from "react";
 import { Metadata } from "next";
-import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import LetterView from "./LetterView";
-import { MESSAGE_SELECT, toMessageData, validMessageWhere } from "@/lib/message";
+import { findMessageById } from "@/lib/message";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
+const getCachedMessage = cache((id: string) => findMessageById(id));
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
-  const message = await prisma.message.findUnique({
-    where: { id, isDeleted: false },
-    select: { content: true, tag: { select: { name: true } } },
-  });
+  const message = await getCachedMessage(id);
 
   if (!message) {
     return { title: "바다사서" };
   }
 
-  const tagName = message.tag?.name;
   const description = message.content.slice(0, 100);
   const ogImageUrl = `/api/og/${id}`;
 
   return {
-    title: tagName ? `${tagName} — 바다사서` : "바다사서",
+    title: message.tag ? `${message.tag} — 바다사서` : "바다사서",
     description,
     openGraph: {
       title: "바다사서 — 바다에서 건져낸 편지",
@@ -44,12 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LetterPage({ params }: Props) {
   const { id } = await params;
 
-  const message = await prisma.message.findFirst({
-    where: { id, ...validMessageWhere() },
-    select: MESSAGE_SELECT,
-  });
+  const message = await getCachedMessage(id);
 
   if (!message) notFound();
 
-  return <LetterView message={toMessageData(message)} />;
+  return <LetterView message={message} />;
 }

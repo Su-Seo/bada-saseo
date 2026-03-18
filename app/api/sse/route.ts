@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { validMessageWhere } from "@/lib/message";
+import { findNewBottlesSince } from "@/lib/message";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -35,14 +34,7 @@ export async function GET(req: NextRequest) {
         if (closed) break;
 
         try {
-          const messages = await prisma.message.findMany({
-            where: {
-              createdAt: { gt: lastChecked },
-              ...validMessageWhere(),
-            },
-            orderBy: { createdAt: "asc" },
-            select: { id: true, createdAt: true, bottleColor: true },
-          });
+          const messages = await findNewBottlesSince(lastChecked);
 
           for (const msg of messages) {
             send({

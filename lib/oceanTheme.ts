@@ -345,3 +345,16 @@ export function getMoonlightColor(t: OceanTheme): string {
   const base = lerpRGB(t.horizon, [180, 190, 210] as RGB, 0.5);
   return `linear-gradient(180deg, rgba(${base[0]},${base[1]},${base[2]},${t.moonGlowOpacity}) 0%, rgba(${base[0]},${base[1]},${base[2]},${t.moonGlowOpacity * 0.5}) 40%, transparent 100%)`;
 }
+
+/** 낮/밤 기반 텍스트 CSS 클래스 */
+export function getTextClasses(isDaytime: boolean) {
+  return {
+    faint:     isDaytime ? "text-white/70"  : "text-white/25",
+    dim:       isDaytime ? "text-white/80"  : "text-white/40",
+    mid:       isDaytime ? "text-white/90"  : "text-white/60",
+    bright:    isDaytime ? "text-white"     : "text-white/90",
+    btn:       isDaytime ? "text-white/70 hover:text-white" : "text-white/30 hover:text-white/60",
+    btnActive: isDaytime ? "bg-black/20 text-white" : "bg-white/20 text-white/90",
+    btnBase:   isDaytime ? "hover:bg-black/10 hover:bg-black/15" : "hover:text-white/60 hover:bg-white/8",
+  } as const;
+}

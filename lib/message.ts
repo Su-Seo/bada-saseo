@@ -1,6 +1,7 @@
 import type { Prisma } from "@/app/generated/prisma";
 import { prisma } from "./db";
 import type { MessageData } from "./types";
+import { EXPIRE_DAYS, REPORT_THRESHOLD } from "./constants";
 
 /** 삭제되지 않고 만료되지 않은 유효한 메시지 필터 */
 export function validMessageWhere(): Prisma.MessageWhereInput {
@@ -53,4 +54,142 @@ export async function resolveTagId(tagName: string | null | undefined): Promise<
     select: { id: true },
   });
   return found?.id ?? null;
+}
+
+// ─── 메시지 조회 ────────────────────────────────────────
+
+/** ID로 유효한 메시지 조회 → 프론트엔드용 플랫 객체 반환 */
+export async function findMessageById(id: string): Promise<(MessageData & { createdAt: Date }) | null> {
+  const raw = await prisma.message.findFirst({
+    where: { id, ...validMessageWhere() },
+    select: MESSAGE_SELECT,
+  });
+  return raw ? toMessageData(raw) : null;
+}
+
+/** 랜덤 메시지 1건 조회. 태그 필터 선택 가능 */
+export async function findRandomMessage(tagName?: string | null): Promise<(MessageData & { createdAt: Date }) | null> {
+  const tagId = tagName ? await resolveTagId(tagName) : null;
+  const where = {
+    ...validMessageWhere(),
+    ...(tagId ? { tagId } : {}),
+  };
+
+  const count = await prisma.message.count({ where });
+  if (count === 0) return null;
+
+  const skip = Math.floor(Math.random() * count);
+  const raw = await prisma.message.findFirst({ where, skip, select: MESSAGE_SELECT });
+  return raw ? toMessageData(raw) : null;
+}
+
+/** 최근 병 목록 (ambient 씬용) */
+export async function findAmbientBottles(take = 4) {
+  return prisma.message.findMany({
+    where: validMessageWhere(),
+    orderBy: { createdAt: "desc" },
+    take,
+    select: { id: true, bottleColor: true },
+  });
+}
+
+/** 특정 시점 이후 새 병 목록 (SSE 폴링용) */
+export async function findNewBottlesSince(since: Date) {
+  return prisma.message.findMany({
+    where: {
+      createdAt: { gt: since },
+      ...validMessageWhere(),
+    },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, createdAt: true, bottleColor: true },
+  });
+}
+
+// ─── 메시지 생성/수정 ──────────────────────────────────
+
+interface CreateMessageInput {
+  content: string;
+  tagId: string | null;
+  bottleColor: string | null;
+  paperStyle: string | null;
+}
+
+/** 새 메시지 생성 */
+export async function createMessage(input: CreateMessageInput) {
+  const expiresAt = new Date(Date.now() + EXPIRE_DAYS * 24 * 60 * 60 * 1000);
+  await prisma.message.create({
+    data: { ...input, expiresAt },
+  });
+}
+
+/** 하트 수 1 증가 */
+export async function incrementHeart(id: string) {
+  await prisma.message.update({
+    where: { id },
+    data: { heartCount: { increment: 1 } },
+  });
+}
+
+/** 신고 처리. 임계값 도달 시 자동 삭제. 메시지 없으면 null 반환 */
+export async function reportMessage(id: string): Promise<boolean> {
+  const message = await findValidMessage(id);
+  if (!message) return false;
+
+  const shouldDelete = message.reportCount + 1 >= REPORT_THRESHOLD;
+  await prisma.message.update({
+    where: { id },
+    data: {
+      reportCount: { increment: 1 },
+      ...(shouldDelete && { isDeleted: true }),
+    },
+  });
+  return true;
+}
+
+// ─── 통계/정리 ──────────────────────────────────────────
+
+/** 오늘/전체 유효 메시지 수 */
+export async function getMessageStats() {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [todayCount, totalCount] = await Promise.all([
+    prisma.message.count({
+      where: { ...validMessageWhere(), createdAt: { gte: todayStart } },
+    }),
+    prisma.message.count({
+      where: validMessageWhere(),
+    }),
+  ]);
+
+  return { todayCount, totalCount };
+}
+
+/** 태그별 메시지 수 통계 */
+export async function getTagStats() {
+  const [tags, grouped] = await Promise.all([
+    findActiveTags(),
+    prisma.message.groupBy({
+      by: ["tagId"],
+      where: { ...validMessageWhere(), tagId: { not: null } },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const countMap = Object.fromEntries(
+    grouped.map((g) => [g.tagId as string, g._count._all]),
+  );
+
+  return tags.map((t) => ({
+    name: t.name,
+    count: countMap[t.id] ?? 0,
+  }));
+}
+
+/** 만료된 메시지 삭제 (cron용) */
+export async function deleteExpiredMessages() {
+  const result = await prisma.message.deleteMany({
+    where: { expiresAt: { lt: new Date() } },
+  });
+  return result.count;
 }

@@ -23,8 +23,10 @@ function createBeachBottle(): BeachBottleItem {
 export function useBeachBottles() {
   const [beachBottles, setBeachBottles] = useState<BeachBottleItem[]>([]);
 
+  // 클라이언트에서만 생성 → hydration mismatch 방지 (Math.random은 서버/클라이언트 값이 다름)
   useEffect(() => {
     const initial = Array.from({ length: 3 }, () => createBeachBottle());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBeachBottles(initial);
 
     const timer = setInterval(() => {

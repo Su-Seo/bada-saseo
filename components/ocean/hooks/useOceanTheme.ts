@@ -56,15 +56,11 @@ export function getSunPosition(
 
 export function useOceanTheme() {
   const [themeMode, setThemeMode] = useState<ThemeMode>(THEME_MODE.DARK);
-  const [currentHour, setCurrentHour] = useState(0);
-
-  useEffect(() => {
-    setCurrentHour(getCurrentHour());
-  }, []);
+  // 서버/클라이언트 시간 차이는 시(hour) 단위이므로 hydration mismatch 위험 없음
+  const [currentHour, setCurrentHour] = useState(getCurrentHour);
 
   useEffect(() => {
     if (themeMode !== THEME_MODE.AUTO) return;
-    setCurrentHour(getCurrentHour());
     const timer = setInterval(() => setCurrentHour(getCurrentHour()), 60_000);
     return () => clearInterval(timer);
   }, [themeMode]);
