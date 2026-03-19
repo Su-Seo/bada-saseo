@@ -11,6 +11,7 @@ interface Props {
   currentHour: number;
   adjustedHour: number | null;
   setAdjustedHour: (h: number | null) => void;
+  animatedHour: number;
 }
 
 function formatHour(h: number): string {
@@ -26,17 +27,15 @@ export default function ThemeToggle({
   currentHour,
   adjustedHour,
   setAdjustedHour,
+  animatedHour,
 }: Props) {
   const btnActive = isDaytime ? "bg-black/20 text-white" : "bg-white/20 text-white/90";
   const btn = isDaytime
     ? "text-white/70 hover:text-white"
     : "text-white/30 hover:text-white/60";
 
-  // 모드별 시계 표시 시간: 밤=자정(0), 낮=정오(12), AUTO=실제/조절 시간
-  const clockHour =
-    themeMode === THEME_MODE.DARK ? 0 :
-    themeMode === THEME_MODE.LIGHT ? 12 :
-    (adjustedHour ?? currentHour);
+  // 애니메이션 중인 시간 사용 — 토글 시 시계바늘과 숫자도 서서히 변함
+  const clockHour = animatedHour;
 
   const handleClockDrag = (h: number) => {
     // 다른 모드에서 드래그하면 자동으로 AUTO 전환

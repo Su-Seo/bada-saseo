@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  OceanTheme,
-  DARK_THEME,
-  LIGHT_THEME,
   getThemeForHour,
   buildGradient,
   getWaveColors,
@@ -26,15 +23,19 @@ function getCurrentHour(): number {
   return now.getHours() + now.getMinutes() / 60;
 }
 
-function getTheme(mode: ThemeMode, hour: number): OceanTheme {
+// 각 모드의 목표 시각 (DARK=자정, LIGHT=정오, AUTO=현재 시각)
+function getTargetHour(mode: ThemeMode, currentHour: number): number {
   switch (mode) {
-    case THEME_MODE.DARK:
-      return DARK_THEME;
-    case THEME_MODE.LIGHT:
-      return LIGHT_THEME;
-    case THEME_MODE.AUTO:
-      return getThemeForHour(hour);
+    case THEME_MODE.DARK: return 0;
+    case THEME_MODE.LIGHT: return 12;
+    case THEME_MODE.AUTO: return currentHour;
   }
+}
+
+// 24시간 원형에서 최단 경로 델타 계산
+function hourDelta(from: number, to: number): number {
+  const forward = ((to - from) % 24 + 24) % 24;
+  return forward <= 12 ? forward : forward - 24;
 }
 
 // 태양 위치 계산 (일출 5:30 ~ 일몰 19:30 호 운동)
@@ -87,6 +88,8 @@ export function getMoonPosition(
   return { x, y };
 }
 
+const THEME_TRANSITION_DURATION = 1000; // ms
+
 export function useOceanTheme() {
   const [themeMode, setThemeMode] = useState<ThemeMode>(DEFAULT_THEME_MODE);
   // 서버/클라이언트 시간 차이는 시(hour) 단위이므로 hydration mismatch 위험 없음
@@ -102,12 +105,70 @@ export function useOceanTheme() {
 
   const activeHour = adjustedHour ?? currentHour;
 
-  const theme = getTheme(themeMode, activeHour);
-  const gradient = buildGradient(theme, HORIZON_PCT, SHORE_PCT, BEACH_PCT);
-  const waveColors = getWaveColors(theme);
-  // opacity 게이트 제거 — 수평선 아래서 서서히 올라오는 효과를 위해 항상 위치 계산
-  const sunPos = getSunPosition(themeMode, activeHour);
-  const moonPos = getMoonPosition(themeMode, activeHour);
+  // 토글 시 시간이 실제로 흘러가는 애니메이션
+  const [animatedHour, setAnimatedHour] = useState(() =>
+    getTargetHour(DEFAULT_THEME_MODE, getCurrentHour())
+  );
+  const animatedHourRef = useRef(animatedHour);
+  const prevThemeModeRef = useRef(themeMode);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const isModeChange = prevThemeModeRef.current !== themeMode;
+    prevThemeModeRef.current = themeMode;
+
+    const targetHour = getTargetHour(themeMode, activeHour);
+
+    if (!isModeChange) {
+      // 시계 드래그 또는 실시간 tick: 즉시 반영
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      animatedHourRef.current = targetHour;
+      setAnimatedHour(targetHour);
+      return;
+    }
+
+    // 테마 모드 변경: 시간이 흘러가는 애니메이션
+    const fromHour = animatedHourRef.current;
+    const delta = hourDelta(fromHour, targetHour);
+    const startTime = performance.now();
+
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    function animate(now: number) {
+      const t = Math.min((now - startTime) / THEME_TRANSITION_DURATION, 1);
+      const smooth = t * t * (3 - 2 * t);
+      const hour = fromHour + delta * smooth;
+      animatedHourRef.current = hour;
+      setAnimatedHour(hour);
+
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      } else {
+        rafRef.current = null;
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [themeMode, activeHour]);
+
+  // animatedHour 기준으로 테마/그라디언트 계산 (태양·달 위치도 함께 이동)
+  const displayTheme = getThemeForHour(animatedHour);
+  const gradient = buildGradient(displayTheme, HORIZON_PCT, SHORE_PCT, BEACH_PCT);
+  const waveColors = getWaveColors(displayTheme);
+  const sunPos = getSunPosition(THEME_MODE.AUTO, animatedHour);
+  const moonPos = getMoonPosition(THEME_MODE.AUTO, animatedHour);
 
   return {
     themeMode,
@@ -115,7 +176,8 @@ export function useOceanTheme() {
     currentHour,
     adjustedHour,
     setAdjustedHour,
-    theme,
+    animatedHour,
+    theme: displayTheme,
     gradient,
     waveColors,
     sunPos,

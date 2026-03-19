@@ -91,7 +91,7 @@ function CloudShape({ cloud }: { cloud: CloudData }) {
   );
 }
 
-export const PLANET_TRANSITION = "opacity 1s ease, left 1s ease, top 1s ease";
+export const PLANET_TRANSITION = "none";
 
 // ── 컴포넌트 ──────────────────────────────────────────
 

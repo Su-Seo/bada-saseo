@@ -24,7 +24,7 @@ import { useBagCounts } from "./hooks/useBagCounts";
 import { BEACH_PCT } from "./constants";
 
 export default function OceanScene() {
-  const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
+  const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, animatedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
   const { horizonY, shoreY } = useViewport();
   const stars = useStars();
   const { bottles, removeBottle, todayCount } = useOceanBottles();
@@ -52,9 +52,9 @@ export default function OceanScene() {
       className="fixed inset-0 overflow-hidden"
       style={{ background: `rgb(${theme.skyTop.join(",")})` }}
     >
-      {/* 레이어 1: 그라디언트 배경 */}
+      {/* 레이어 1: 그라디언트 배경 (CSS transition 제거 — JS RAF로 직접 애니메이션) */}
       <div
-        className="absolute inset-0 transition-[background] duration-[3000ms]"
+        className="absolute inset-0"
         style={{ background: gradient }}
       />
 
@@ -147,6 +147,7 @@ export default function OceanScene() {
           currentHour={currentHour}
           adjustedHour={adjustedHour}
           setAdjustedHour={setAdjustedHour}
+          animatedHour={animatedHour}
         />
       </div>
 

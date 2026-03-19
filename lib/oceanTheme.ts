@@ -179,7 +179,7 @@ function lerpRGB(a: RGB, b: RGB, t: number): RGB {
   ];
 }
 
-function lerpTheme(a: OceanTheme, b: OceanTheme, t: number): OceanTheme {
+export function lerpTheme(a: OceanTheme, b: OceanTheme, t: number): OceanTheme {
   return {
     skyTop: lerpRGB(a.skyTop, b.skyTop, t),
     skyBottom: lerpRGB(a.skyBottom, b.skyBottom, t),
