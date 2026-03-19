@@ -9,10 +9,8 @@ export async function GET(req: Request) {
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
 
-  const to = toParam ? new Date(toParam) : new Date();
-  const from = fromParam
-    ? new Date(fromParam)
-    : new Date("2024-01-01"); // 전체 (서비스 시작일 이전)
+  const to = toParam ? new Date(toParam + "T23:59:59.999") : new Date();
+  const from = fromParam ? new Date(fromParam) : new Date("2024-01-01");
 
   const data = await getMessageCountByDate(from, to);
   return NextResponse.json({ data });

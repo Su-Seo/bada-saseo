@@ -5,8 +5,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const from = searchParams.get("from") ? new Date(searchParams.get("from")!) : undefined;
-  const to = searchParams.get("to") ? new Date(searchParams.get("to")!) : undefined;
+  const fromParam = searchParams.get("from");
+  const toParam = searchParams.get("to");
+  const from = fromParam ? new Date(fromParam) : undefined;
+  const to = toParam ? new Date(toParam + "T23:59:59.999") : undefined;
 
   const stats = await getMessageStats(from, to);
   return NextResponse.json(stats);

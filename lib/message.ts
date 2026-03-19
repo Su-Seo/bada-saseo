@@ -181,7 +181,7 @@ export async function getMessageStats(from?: Date, to?: Date) {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todayFrom = from && from > todayStart ? from : todayStart;
-  const todayFilter = { createdAt: { gte: todayFrom, ...(to && { lte: to }) } };
+  const todayFilter = { createdAt: { gte: todayFrom } };
 
   const [todayCount, totalCount] = await Promise.all([
     prisma.message.count({
