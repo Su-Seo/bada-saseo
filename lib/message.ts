@@ -85,16 +85,6 @@ export async function findRandomMessage(tagName?: string | null): Promise<(Messa
   return raw ? toMessageData(raw) : null;
 }
 
-/** 최근 병 목록 (ambient 씬용) */
-export async function findAmbientBottles(take = 4) {
-  return prisma.message.findMany({
-    where: validMessageWhere(),
-    orderBy: { createdAt: "desc" },
-    take,
-    select: { id: true, bottleColor: true },
-  });
-}
-
 /** 특정 시점 이후 새 병 목록 (SSE 폴링용) */
 export async function findNewBottlesSince(since: Date) {
   return prisma.message.findMany({

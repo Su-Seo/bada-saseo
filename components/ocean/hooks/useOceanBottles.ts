@@ -97,15 +97,5 @@ export function useOceanBottles() {
     });
   }, []);
 
-  // ── 앰비언트 병 ────────────────────────────────────
-  useEffect(() => {
-    fetchJSON<{ messages?: { id: string; bottleColor?: string | null }[] }>("/api/messages/ambient").then((data) => {
-      if (!data?.messages) return;
-      data.messages.slice(0, 4).forEach((msg, i) => {
-        setTimeout(() => addBottle(msg.id, msg.bottleColor), i * 2200);
-      });
-    });
-  }, [addBottle]);
-
   return { bottles, addBottle, removeBottle, todayCount };
 }
