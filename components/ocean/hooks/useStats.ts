@@ -5,8 +5,6 @@ import type { WordEntry } from "@/lib/wordFrequency";
 interface Stats {
   todayCount: number;
   totalCount: number;
-  totalHearts: number;
-  avgHeart: number;
 }
 
 interface TagStat {

@@ -183,25 +183,18 @@ export async function getMessageStats(from?: Date, to?: Date) {
   const todayFrom = from && from > todayStart ? from : todayStart;
   const todayFilter = { createdAt: { gte: todayFrom, ...(to && { lte: to }) } };
 
-  const [todayCount, totalCount, heartAgg] = await Promise.all([
+  const [todayCount, totalCount] = await Promise.all([
     prisma.message.count({
       where: { ...validMessageWhere(), ...todayFilter },
     }),
     prisma.message.count({
       where: { ...validMessageWhere(), ...dateFilter },
     }),
-    prisma.message.aggregate({
-      where: { ...validMessageWhere(), ...dateFilter },
-      _avg: { heartCount: true },
-      _sum: { heartCount: true },
-    }),
   ]);
 
   return {
     todayCount,
     totalCount,
-    totalHearts: heartAgg._sum.heartCount ?? 0,
-    avgHeart: Math.round((heartAgg._avg.heartCount ?? 0) * 10) / 10,
   };
 }
 

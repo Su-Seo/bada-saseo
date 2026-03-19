@@ -14,7 +14,7 @@ interface Props {
 const PRESETS = [
   { label: "오늘", days: 1 },
   { label: "7일", days: 7 },
-  { label: "전체", days: 0 },
+  { label: "30일", days: 30 },
 ];
 
 function toDateStr(d: Date) {
@@ -40,7 +40,6 @@ export default function StatsModal({ onClose }: Props) {
 
   const fromDate = (() => {
     if (isCustom && customFrom) return customFrom;
-    if (preset === 0) return ""; // 전체
     const d = new Date();
     d.setDate(d.getDate() - (preset - 1));
     return toDateStr(d);
@@ -145,11 +144,9 @@ export default function StatsModal({ onClose }: Props) {
           {!loading && data && (
             <>
               {/* 총계 카드 */}
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2">
                 <StatCard label="기간 편지" value={data.stats.totalCount.toLocaleString()} sub="선택 기간 합계" />
                 <StatCard label="오늘 편지" value={data.stats.todayCount.toLocaleString()} sub="오늘 띄워진 병" />
-                <StatCard label="총 하트" value={data.stats.totalHearts.toLocaleString()} sub="받은 공감" />
-                <StatCard label="평균 하트" value={data.stats.avgHeart.toFixed(1)} sub="편지당 평균" />
               </div>
 
               {/* 일별 편지 추이 */}
