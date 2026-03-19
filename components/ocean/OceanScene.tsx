@@ -18,6 +18,9 @@ import { useBeachBottles } from "./hooks/useBeachBottles";
 import SoundToggle from "@/components/SoundToggle";
 import ThemeToggle from "./ThemeToggle";
 import StatsModal from "./StatsModal";
+import BottleBag, { type BagType } from "./BottleBag";
+import TodayBottlesModal from "./TodayBottlesModal";
+import { BEACH_PCT } from "./constants";
 
 export default function OceanScene() {
   const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
@@ -29,6 +32,7 @@ export default function OceanScene() {
   const [throwOpen, setThrowOpen] = useState(false);
   const [pickMessageId, setPickMessageId] = useState<string | null>(null);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [todayBagOpen, setTodayBagOpen] = useState<BagType | null>(null);
 
   const isDaytime = theme.sunOpacity > 0.5;
   const txt = getTextClasses(isDaytime);
@@ -81,6 +85,23 @@ export default function OceanScene() {
         onBeachThrow={handleBeachThrow}
         onBeachRemove={handleBeachRemove}
       />
+
+      {/* ── UI: 보자기 (모래사장 왼쪽 상단) ── */}
+      <div
+        className="fixed z-[28] flex flex-col items-start"
+        style={{ left: "3%", top: `calc(${BEACH_PCT * 100}% + 10px)` }}
+      >
+        <BottleBag
+          type="unhearded"
+          isDaytime={isDaytime}
+          onClick={() => setTodayBagOpen("unhearded")}
+        />
+        <BottleBag
+          type="hearted"
+          isDaytime={isDaytime}
+          onClick={() => setTodayBagOpen("hearted")}
+        />
+      </div>
 
       {/* ── UI: 던지기 버튼 ── */}
       <button
@@ -171,6 +192,14 @@ export default function OceanScene() {
           <PickModal key="pick" messageId={pickMessageId} onClose={() => setPickMessageId(null)} />
         )}
         {statsOpen && <StatsModal key="stats" onClose={() => setStatsOpen(false)} />}
+        {todayBagOpen && (
+          <TodayBottlesModal
+            key={`bag-${todayBagOpen}`}
+            type={todayBagOpen}
+            onClose={() => setTodayBagOpen(null)}
+            onPickMessage={(id) => setPickMessageId(id)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );

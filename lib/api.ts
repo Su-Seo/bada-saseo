@@ -1,4 +1,6 @@
-import type { ComposeOptions } from "./types";
+import type { ComposeOptions, MessageData } from "./types";
+
+export type TodayBottleItem = MessageData & { createdAt: string };
 
 /** GET JSON 유틸 — 실패 시 null 반환 */
 export async function fetchJSON<T>(url: string): Promise<T | null> {
@@ -9,6 +11,11 @@ export async function fetchJSON<T>(url: string): Promise<T | null> {
   } catch {
     return null;
   }
+}
+
+/** 오늘 보낸 유리병 목록 조회. hearted=true이면 공감받은 것만 */
+export function fetchTodayBottles(hearted: boolean) {
+  return fetchJSON<TodayBottleItem[]>(`/api/messages/today?hearted=${hearted}`);
 }
 
 /** 편지 작성 API 호출 — 전역 단일 정의 */

@@ -103,8 +103,8 @@ export default function OceanWaves({ theme, waveColors, sunPos }: Props) {
           }}
         >
           {SUN_SPARKLES.map((s, i) => {
-            // 수평선에서 수렴(±8%), 해안에서 퍼짐(±38%)
-            const bandHalf = 8 + s.y * 0.30;
+            // 수평선에서 수렴(±8%), 해안에서 퍼짐(±58%)
+            const bandHalf = 8 + s.y * 0.50;
             const x = Math.max(1, Math.min(99, sunPos.x + s.xRel * bandHalf));
             return (
               <div

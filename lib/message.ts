@@ -85,6 +85,22 @@ export async function findRandomMessage(tagName?: string | null): Promise<(Messa
   return raw ? toMessageData(raw) : null;
 }
 
+/** 오늘 보낸 메시지 목록. hearted=true이면 공감(heartCount>0)만, false이면 미공감만 */
+export async function findTodayMessages(hearted: boolean) {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  return prisma.message.findMany({
+    where: {
+      ...validMessageWhere(),
+      createdAt: { gte: todayStart },
+      heartCount: hearted ? { gt: 0 } : { equals: 0 },
+    },
+    orderBy: { createdAt: "desc" },
+    select: MESSAGE_SELECT,
+  });
+}
+
 /** 특정 시점 이후 새 병 목록 (SSE 폴링용) */
 export async function findNewBottlesSince(since: Date) {
   return prisma.message.findMany({
