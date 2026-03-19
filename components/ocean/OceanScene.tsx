@@ -94,10 +94,10 @@ export default function OceanScene() {
         style={{ left: "3%", top: `calc(${BEACH_PCT * 100}% + 10px)` }}
       >
         <BottleBag
-          type="unhearded"
+          type="unhearted"
           isDaytime={isDaytime}
-          bottleCount={bagCounts.unhearded}
-          onClick={() => setTodayBagOpen("unhearded")}
+          bottleCount={bagCounts.unhearted}
+          onClick={() => setTodayBagOpen("unhearted")}
         />
         <BottleBag
           type="hearted"

@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { fetchTodayBagCounts } from "@/lib/api";
 
 interface BagCounts {
-  unhearded: number;
+  unhearted: number;
   hearted: number;
 }
 
 export function useBagCounts() {
-  const [counts, setCounts] = useState<BagCounts>({ unhearded: 0, hearted: 0 });
+  const [counts, setCounts] = useState<BagCounts>({ unhearted: 0, hearted: 0 });
 
   useEffect(() => {
     fetchTodayBagCounts().then((data) => {

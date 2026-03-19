@@ -12,7 +12,7 @@ import {
   type GradientStop,
 } from "@/lib/bottleTheme";
 
-export type BagType = "unhearded" | "hearted";
+export type BagType = "unhearted" | "hearted";
 
 interface Props {
   type: BagType;
@@ -103,7 +103,7 @@ function BagSVG({ type, isDaytime, bottleCount }: { type: BagType; isDaytime: bo
     ? MAX_VISUAL
     : Math.min(MAX_VISUAL, Math.max(0, bottleCount));
 
-  // hearted: 분홍, unhearded: 갈색 — 반투명 RGBA 톤
+  // hearted: 분홍, unhearted: 갈색 — 반투명 RGBA 톤
   const c = isHearted
     ? {
         body:     isDaytime ? "rgba(230,140,170,0.50)" : "rgba(140,60,90,0.50)",

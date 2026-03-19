@@ -101,16 +101,16 @@ export async function findTodayMessages(hearted: boolean) {
   });
 }
 
-/** 오늘 병 개수 — unhearded/hearted 구분 */
+/** 오늘 병 개수 — unhearted/hearted 구분 */
 export async function countTodayMessages() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const base = { ...validMessageWhere(), createdAt: { gte: todayStart } };
-  const [unhearded, hearted] = await Promise.all([
+  const [unhearted, hearted] = await Promise.all([
     prisma.message.count({ where: { ...base, heartCount: { equals: 0 } } }),
     prisma.message.count({ where: { ...base, heartCount: { gt: 0 } } }),
   ]);
-  return { unhearded, hearted };
+  return { unhearted, hearted };
 }
 
 /** 특정 시점 이후 새 병 목록 (SSE 폴링용) */

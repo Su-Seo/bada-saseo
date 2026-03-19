@@ -20,7 +20,7 @@ export function fetchTodayBottles(hearted: boolean) {
 
 /** 오늘 병 개수 — 자루 시각화용 */
 export function fetchTodayBagCounts() {
-  return fetchJSON<{ unhearded: number; hearted: number }>("/api/messages/today/count");
+  return fetchJSON<{ unhearted: number; hearted: number }>("/api/messages/today/count");
 }
 
 /** 편지 작성 API 호출 — 전역 단일 정의 */
