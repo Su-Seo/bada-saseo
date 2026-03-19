@@ -14,7 +14,7 @@ export interface BeachBottleItem {
 function createBeachBottle(): BeachBottleItem {
   return {
     id: uid("bb"),
-    x: rand(6, 86),
+    x: rand(22, 92),
     y: rand(3, 19),
     rotation: rand(-35, 12),
   };
