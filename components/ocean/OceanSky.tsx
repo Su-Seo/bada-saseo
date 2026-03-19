@@ -10,6 +10,7 @@ interface Props {
   theme: OceanTheme;
   stars: Star[];
   sunPos: { x: number; y: number } | null;
+  moonPos: { x: number; y: number } | null;
 }
 
 // ── 구름 생성 ─────────────────────────────────────────
@@ -92,7 +93,7 @@ function CloudShape({ cloud }: { cloud: CloudData }) {
 
 // ── 컴포넌트 ──────────────────────────────────────────
 
-export default function OceanSky({ theme, stars, sunPos }: Props) {
+export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
   // 마운트 시 1회만 생성 — 페이지 리로드마다 다른 구름
   const clouds = useMemo(() => genClouds(6), []);
 
@@ -118,26 +119,28 @@ export default function OceanSky({ theme, stars, sunPos }: Props) {
         ))}
 
       {/* ── 달 ── */}
-      {theme.moonOpacity > 0.01 && (
+      {theme.moonOpacity > 0.01 && moonPos && (
         <>
           <div
             className="absolute rounded-full pointer-events-none"
             style={{
-              right: "9%",
-              top: "4%",
+              left: `${moonPos.x}%`,
+              top: `${moonPos.y}%`,
+              transform: "translate(-50%, -50%)",
               width: 180,
               height: 180,
               opacity: theme.moonOpacity,
               background:
                 "radial-gradient(circle, rgba(200,210,240,0.06) 0%, transparent 70%)",
-              transition: "opacity 3s ease",
+              transition: "opacity 3s ease, left 3s ease, top 3s ease",
             }}
           />
           <div
             className="absolute rounded-full"
             style={{
-              right: "13%",
-              top: "8%",
+              left: `${moonPos.x}%`,
+              top: `${moonPos.y}%`,
+              transform: "translate(-50%, -50%)",
               width: 38,
               height: 38,
               opacity: theme.moonOpacity,
@@ -145,7 +148,7 @@ export default function OceanSky({ theme, stars, sunPos }: Props) {
                 "radial-gradient(circle at 35% 35%, #e8e4d8, #d4cfc0 50%, #bab5a5 80%, #a09a88)",
               boxShadow:
                 "0 0 12px rgba(220,215,195,0.35), 0 0 40px rgba(200,195,175,0.1)",
-              transition: "opacity 3s ease",
+              transition: "opacity 3s ease, left 3s ease, top 3s ease",
             }}
           />
         </>
@@ -181,7 +184,7 @@ export default function OceanSky({ theme, stars, sunPos }: Props) {
       </div>
 
       {/* ── 태양 ── */}
-      {sunPos && (
+      {sunPos && theme.sunOpacity > 0.01 && (
         <>
           <div
             className="absolute rounded-full pointer-events-none"
@@ -217,17 +220,18 @@ export default function OceanSky({ theme, stars, sunPos }: Props) {
       )}
 
       {/* ── 달빛 반사 ── */}
-      {theme.moonOpacity > 0.01 && (
+      {theme.moonOpacity > 0.01 && moonPos && (
         <div
           className="absolute pointer-events-none"
           style={{
-            right: "8%",
+            left: `${moonPos.x}%`,
+            transform: "translateX(-50%)",
             top: `${HORIZON_PCT * 100 + 1}%`,
             width: "12%",
             height: "28%",
             background: getMoonlightColor(theme),
             filter: "blur(8px)",
-            transition: "opacity 3s ease",
+            transition: "opacity 3s ease, left 3s ease",
           }}
         />
       )}

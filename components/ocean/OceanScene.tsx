@@ -20,7 +20,7 @@ import ThemeToggle from "./ThemeToggle";
 import StatsModal from "./StatsModal";
 
 export default function OceanScene() {
-  const { themeMode, setThemeMode, theme, gradient, waveColors, sunPos } = useOceanTheme();
+  const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
   const { horizonY, shoreY } = useViewport();
   const stars = useStars();
   const { bottles, removeBottle, todayCount } = useOceanBottles();
@@ -53,7 +53,7 @@ export default function OceanScene() {
       />
 
       {/* 레이어 2-5: 하늘 (별, 달, 태양, 수평선 발광) */}
-      <OceanSky theme={theme} stars={stars} sunPos={sunPos} />
+      <OceanSky theme={theme} stars={stars} sunPos={sunPos} moonPos={moonPos} />
 
       {/* 레이어 5a-6b: 바다 파도 */}
       <OceanWaves theme={theme} waveColors={waveColors} sunPos={sunPos} />
@@ -113,8 +113,15 @@ export default function OceanScene() {
       </div>
 
       {/* ── UI: 우상단 설정 (테마 토글 + 소리) ── */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <ThemeToggle themeMode={themeMode} setThemeMode={setThemeMode} isDaytime={isDaytime} />
+      <div className="fixed top-4 right-4 z-50 flex items-start gap-2">
+        <ThemeToggle
+          themeMode={themeMode}
+          setThemeMode={setThemeMode}
+          isDaytime={isDaytime}
+          currentHour={currentHour}
+          adjustedHour={adjustedHour}
+          setAdjustedHour={setAdjustedHour}
+        />
         <SoundToggle isDaytime={isDaytime} />
       </div>
 
