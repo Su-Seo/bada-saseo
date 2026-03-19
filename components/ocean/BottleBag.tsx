@@ -17,6 +17,7 @@ export type BagType = "unhearded" | "hearted";
 interface Props {
   type: BagType;
   isDaytime: boolean;
+  bottleCount?: number;
   onClick: () => void;
 }
 
@@ -76,9 +77,31 @@ function HorizontalBottle({ x, y, rotate, isDaytime, uid }: {
   );
 }
 
-function BagSVG({ type, isDaytime }: { type: BagType; isDaytime: boolean }) {
+/** 자루 안에 배치할 병 10개의 위치 정보 (아래층 → 중간층 → 위층 순) */
+const BOTTLE_CONFIGS = [
+  // 아래층 (3개)
+  { x: 18, y: 30, rotate: 3   },
+  { x: 34, y: 31, rotate: -16 },
+  { x: 50, y: 30, rotate: 180 },
+  // 중간층 (4개)
+  { x: 14, y: 26, rotate: -14  },
+  { x: 28, y: 27, rotate: 187  },
+  { x: 42, y: 26, rotate: -202 },
+  { x: 56, y: 27, rotate: 189  },
+  // 위층 (3개)
+  { x: 20, y: 22, rotate: 8    },
+  { x: 36, y: 21, rotate: 5    },
+  { x: 45, y: 22, rotate: -196 },
+] as const;
+
+const MAX_VISUAL = BOTTLE_CONFIGS.length; // 10
+
+function BagSVG({ type, isDaytime, bottleCount }: { type: BagType; isDaytime: boolean; bottleCount?: number }) {
   const isHearted = type === "hearted";
   const gid = `bag-${type}`;
+  const visibleCount = bottleCount === undefined
+    ? MAX_VISUAL
+    : Math.min(MAX_VISUAL, Math.max(0, bottleCount));
 
   // hearted: 분홍, unhearded: 갈색 — 반투명 RGBA 톤
   const c = isHearted
@@ -155,19 +178,14 @@ function BagSVG({ type, isDaytime }: { type: BagType; isDaytime: boolean }) {
 
       {/* ── 가로로 쌓인 유리병들 (자루 안으로 클립) ── */}
       <g clipPath={`url(#${gid}-clip)`}>
-        {/* 안쪽 층 */}
-        <HorizontalBottle x={18} y={30} rotate={3}   isDaytime={isDaytime} uid={`${gid}-b0`} />
-        <HorizontalBottle x={34} y={31} rotate={-16}  isDaytime={isDaytime} uid={`${gid}-b1`} />
-        <HorizontalBottle x={50} y={30} rotate={180}  isDaytime={isDaytime} uid={`${gid}-b2`} />
-        {/* 중간 층 */}
-        <HorizontalBottle x={14} y={26} rotate={-14}  isDaytime={isDaytime} uid={`${gid}-b3`} />
-        <HorizontalBottle x={28} y={27} rotate={187}   isDaytime={isDaytime} uid={`${gid}-b4`} />
-        <HorizontalBottle x={42} y={26} rotate={-202}  isDaytime={isDaytime} uid={`${gid}-b5`} />
-        <HorizontalBottle x={56} y={27} rotate={189}   isDaytime={isDaytime} uid={`${gid}-b6`} />
-        {/* 맨 위 층 */}
-        <HorizontalBottle x={20} y={22} rotate={8}  isDaytime={isDaytime} uid={`${gid}-b7`} />
-        <HorizontalBottle x={36} y={21} rotate={5}   isDaytime={isDaytime} uid={`${gid}-b8`} />
-        <HorizontalBottle x={45} y={22} rotate={-196}  isDaytime={isDaytime} uid={`${gid}-b9`} />
+        {BOTTLE_CONFIGS.slice(0, visibleCount).map((cfg, i) => (
+          <HorizontalBottle
+            key={i}
+            x={cfg.x} y={cfg.y} rotate={cfg.rotate}
+            isDaytime={isDaytime}
+            uid={`${gid}-b${i}`}
+          />
+        ))}
       </g>
 
       {/* ── 테두리 — 부드러운 림 ── */}
@@ -210,7 +228,7 @@ function BagSVG({ type, isDaytime }: { type: BagType; isDaytime: boolean }) {
   );
 }
 
-export default function BottleBag({ type, isDaytime, onClick }: Props) {
+export default function BottleBag({ type, isDaytime, bottleCount, onClick }: Props) {
   const label = type === "hearted" ? "공감받은 병들" : "외로운 병들";
   return (
     <motion.button
@@ -221,7 +239,7 @@ export default function BottleBag({ type, isDaytime, onClick }: Props) {
       transition={{ type: "spring", stiffness: 340, damping: 20 }}
       aria-label={`${label} 보기`}
     >
-      <BagSVG type={type} isDaytime={isDaytime} />
+      <BagSVG type={type} isDaytime={isDaytime} bottleCount={bottleCount} />
     </motion.button>
   );
 }

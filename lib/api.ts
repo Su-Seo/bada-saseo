@@ -18,6 +18,11 @@ export function fetchTodayBottles(hearted: boolean) {
   return fetchJSON<TodayBottleItem[]>(`/api/messages/today?hearted=${hearted}`);
 }
 
+/** 오늘 병 개수 — 자루 시각화용 */
+export function fetchTodayBagCounts() {
+  return fetchJSON<{ unhearded: number; hearted: number }>("/api/messages/today/count");
+}
+
 /** 편지 작성 API 호출 — 전역 단일 정의 */
 export async function postMessage(
   content: string,

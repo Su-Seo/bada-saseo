@@ -20,6 +20,7 @@ import ThemeToggle from "./ThemeToggle";
 import StatsModal from "./StatsModal";
 import BottleBag, { type BagType } from "./BottleBag";
 import TodayBottlesModal from "./TodayBottlesModal";
+import { useBagCounts } from "./hooks/useBagCounts";
 import { BEACH_PCT } from "./constants";
 
 export default function OceanScene() {
@@ -27,6 +28,7 @@ export default function OceanScene() {
   const { horizonY, shoreY } = useViewport();
   const stars = useStars();
   const { bottles, removeBottle, todayCount } = useOceanBottles();
+  const bagCounts = useBagCounts();
   const { beachBottles, handleBeachThrow, handleBeachRemove } = useBeachBottles();
 
   const [throwOpen, setThrowOpen] = useState(false);
@@ -94,11 +96,13 @@ export default function OceanScene() {
         <BottleBag
           type="unhearded"
           isDaytime={isDaytime}
+          bottleCount={bagCounts.unhearded}
           onClick={() => setTodayBagOpen("unhearded")}
         />
         <BottleBag
           type="hearted"
           isDaytime={isDaytime}
+          bottleCount={bagCounts.hearted}
           onClick={() => setTodayBagOpen("hearted")}
         />
       </div>
