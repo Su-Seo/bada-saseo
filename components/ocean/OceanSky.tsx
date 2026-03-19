@@ -118,43 +118,98 @@ export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
               transition: "opacity 3s ease",
             }}
           />
-        ))}
+      ))}
 
-      {/* ── 달 ── */}
-      {theme.moonOpacity > 0.01 && moonPos && (
-        <>
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              left: `${moonPos.x}%`,
-              top: `${moonPos.y}%`,
-              transform: "translate(-50%, -50%)",
-              width: 180,
-              height: 180,
-              opacity: theme.moonOpacity,
-              background:
-                "radial-gradient(circle, rgba(200,210,240,0.06) 0%, transparent 70%)",
-              transition: PLANET_TRANSITION,
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              left: `${moonPos.x}%`,
-              top: `${moonPos.y}%`,
-              transform: "translate(-50%, -50%)",
-              width: 38,
-              height: 38,
-              opacity: theme.moonOpacity,
-              background:
-                "radial-gradient(circle at 35% 35%, #e8e4d8, #d4cfc0 50%, #bab5a5 80%, #a09a88)",
-              boxShadow:
-                "0 0 12px rgba(220,215,195,0.35), 0 0 40px rgba(200,195,175,0.1)",
-              transition: PLANET_TRANSITION,
-            }}
-          />
-        </>
-      )}
+      {/* ── 달 + 태양 (수평선 아래 바다에 가려짐) ── */}
+      <div
+        className="absolute inset-2 pointer-events-none"
+        style={{ clipPath: `inset(0 0 ${((1 - HORIZON_PCT) * 100).toFixed(2)}% 0)` }}
+      >
+        {/* 달 */}
+        {theme.moonOpacity > 0.01 && moonPos && (
+          <>
+            <div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                left: `${moonPos.x}%`,
+                top: `${moonPos.y}%`,
+                transform: "translate(-50%, -50%)",
+                width: 180,
+                height: 180,
+                opacity: theme.moonOpacity,
+                background:
+                  "radial-gradient(circle, rgba(200,210,240,0.06) 0%, transparent 70%)",
+                transition: PLANET_TRANSITION,
+              }}
+            />
+            <div
+              className="absolute rounded-full"
+              style={{
+                left: `${moonPos.x}%`,
+                top: `${moonPos.y}%`,
+                transform: "translate(-50%, -50%)",
+                width: 38,
+                height: 38,
+                opacity: theme.moonOpacity,
+                background:
+                  "radial-gradient(circle at 35% 35%, #e8e4d8, #d4cfc0 50%, #bab5a5 80%, #a09a88)",
+                boxShadow:
+                  "0 0 12px rgba(220,215,195,0.35), 0 0 40px rgba(200,195,175,0.1)",
+                transition: PLANET_TRANSITION,
+              }}
+            />
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: `${moonPos.x}%`,
+                transform: "translateX(-50%)",
+                top: `${HORIZON_PCT * 100 + 1}%`,
+                width: "12%",
+                height: "28%",
+                background: getMoonlightColor(theme),
+                filter: "blur(8px)",
+                transition: "opacity 3s ease, left 3s ease",
+              }}
+            />
+          </>
+        )}
+
+        {/* 태양 */}
+        {sunPos && theme.sunOpacity > 0.01 && (
+          <>
+            <div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                left: `${sunPos.x}%`,
+                top: `${sunPos.y}%`,
+                transform: "translate(-50%, -50%)",
+                width: 220,
+                height: 220,
+                opacity: theme.sunOpacity * 0.35,
+                background:
+                  "radial-gradient(circle, rgba(255,240,160,0.5) 0%, rgba(255,210,80,0.2) 35%, transparent 70%)",
+                transition: PLANET_TRANSITION,
+              }}
+            />
+            <div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                left: `${sunPos.x}%`,
+                top: `${sunPos.y}%`,
+                transform: "translate(-50%, -50%)",
+                width: 46,
+                height: 46,
+                opacity: theme.sunOpacity,
+                background:
+                  "radial-gradient(circle at 42% 38%, #fffde8, #ffe966 40%, #ffd020 70%, #ffb800)",
+                boxShadow:
+                  "0 0 18px rgba(255,220,60,0.7), 0 0 55px rgba(255,190,40,0.3)",
+                transition: PLANET_TRANSITION,
+              }}
+            />
+          </>
+        )}
+      </div>
 
       {/* ── 구름 (낮에만) ── */}
       <div
@@ -184,59 +239,6 @@ export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
           </div>
         ))}
       </div>
-
-      {/* ── 태양 ── */}
-      {sunPos && theme.sunOpacity > 0.01 && (
-        <>
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              left: `${sunPos.x}%`,
-              top: `${sunPos.y}%`,
-              transform: "translate(-50%, -50%)",
-              width: 220,
-              height: 220,
-              opacity: theme.sunOpacity * 0.35,
-              background:
-                "radial-gradient(circle, rgba(255,240,160,0.5) 0%, rgba(255,210,80,0.2) 35%, transparent 70%)",
-              transition: PLANET_TRANSITION,
-            }}
-          />
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              left: `${sunPos.x}%`,
-              top: `${sunPos.y}%`,
-              transform: "translate(-50%, -50%)",
-              width: 46,
-              height: 46,
-              opacity: theme.sunOpacity,
-              background:
-                "radial-gradient(circle at 42% 38%, #fffde8, #ffe966 40%, #ffd020 70%, #ffb800)",
-              boxShadow:
-                "0 0 18px rgba(255,220,60,0.7), 0 0 55px rgba(255,190,40,0.3)",
-              transition: PLANET_TRANSITION,
-            }}
-          />
-        </>
-      )}
-
-      {/* ── 달빛 반사 ── */}
-      {theme.moonOpacity > 0.01 && moonPos && (
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            left: `${moonPos.x}%`,
-            transform: "translateX(-50%)",
-            top: `${HORIZON_PCT * 100 + 1}%`,
-            width: "12%",
-            height: "28%",
-            background: getMoonlightColor(theme),
-            filter: "blur(8px)",
-            transition: "opacity 3s ease, left 3s ease",
-          }}
-        />
-      )}
 
       {/* ── 수평선 발광 ── */}
       <div
