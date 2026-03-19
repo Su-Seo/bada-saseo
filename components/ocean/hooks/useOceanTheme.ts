@@ -17,6 +17,8 @@ export const THEME_MODE = {
   AUTO: "auto",
 } as const;
 
+const DEFAULT_THEME_MODE: ThemeMode = THEME_MODE.AUTO;
+
 export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE];
 
 function getCurrentHour(): number {
@@ -55,7 +57,7 @@ export function getSunPosition(
 }
 
 export function useOceanTheme() {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(THEME_MODE.DARK);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(DEFAULT_THEME_MODE);
   // 서버/클라이언트 시간 차이는 시(hour) 단위이므로 hydration mismatch 위험 없음
   const [currentHour, setCurrentHour] = useState(getCurrentHour);
 
