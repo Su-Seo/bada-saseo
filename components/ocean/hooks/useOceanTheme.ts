@@ -99,7 +99,7 @@ export function useOceanTheme() {
 
   useEffect(() => {
     if (themeMode !== THEME_MODE.AUTO) return;
-    const timer = setInterval(() => setCurrentHour(getCurrentHour()), 60_000);
+    const timer = setInterval(() => setCurrentHour(getCurrentHour()), 10_000);
     return () => clearInterval(timer);
   }, [themeMode]);
 
