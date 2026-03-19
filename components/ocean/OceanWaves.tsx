@@ -3,6 +3,7 @@
 import type { OceanTheme } from "@/lib/oceanTheme";
 import { getWashBackground, getWaveColors } from "@/lib/oceanTheme";
 import { HORIZON_PCT, SHORE_PCT, BEACH_PCT } from "./constants";
+import { PLANET_TRANSITION } from "./OceanSky";
 
 interface Props {
   theme: OceanTheme;
@@ -98,7 +99,7 @@ export default function OceanWaves({ theme, waveColors, sunPos }: Props) {
             top: `${HORIZON_PCT * 100 + 1}%`,
             height: `${(SHORE_PCT - HORIZON_PCT) * 100 - 2}%`,
             zIndex: 6,
-            opacity: Math.min(theme.sunOpacity * 1.1, 1),
+            opacity: Math.min(theme.sunOpacity * 1.1, 1)
           }}
         >
           {SUN_SPARKLES.map((s, i) => {
@@ -116,6 +117,7 @@ export default function OceanWaves({ theme, waveColors, sunPos }: Props) {
                   height: `${s.h}px`,
                   "--delay": `${s.delay}s`,
                   "--duration": `${s.duration}s`,
+                  transition: PLANET_TRANSITION,
                 } as React.CSSProperties}
               />
             );
