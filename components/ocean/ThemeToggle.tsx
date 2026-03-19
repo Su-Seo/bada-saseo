@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { THEME_MODE } from "./hooks/useOceanTheme";
 import type { ThemeMode } from "./hooks/useOceanTheme";
 
@@ -34,6 +34,9 @@ function ClockDial({
   const R = SIZE / 2 - 6;
   const svgRef = useRef<SVGSVGElement>(null);
   const dragging = useRef(false);
+  // SSR에서 trigonometric 부동소수점 serialization mismatch 방지 — 클라이언트에서만 렌더링
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // 진짜 시계처럼 12h 원형 좌표 (12 = 상단, 시계방향)
   const toXY = (h12: number, radius: number) => {
@@ -101,6 +104,9 @@ function ClockDial({
   const p1 = { x: cx + halfW * Math.cos(perpRad), y: cy + halfW * Math.sin(perpRad) };
   const p2 = { x: cx - halfW * Math.cos(perpRad), y: cy - halfW * Math.sin(perpRad) };
   const handPoints = `${tip.x.toFixed(2)},${tip.y.toFixed(2)} ${p1.x.toFixed(2)},${p1.y.toFixed(2)} ${tail.x.toFixed(2)},${tail.y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
+
+  // SSR에서는 동일한 크기의 빈 placeholder 렌더링
+  if (!mounted) return <div style={{ width: SIZE, height: SIZE }} />;
 
   return (
     <svg
@@ -189,18 +195,21 @@ export default function ThemeToggle({
     ? "text-white/70 hover:text-white"
     : "text-white/30 hover:text-white/60";
 
-  const displayHour = adjustedHour ?? currentHour;
-  const isAuto = themeMode === THEME_MODE.AUTO;
+  // 모드별 시계 표시 시간: 밤=자정(0), 낮=정오(12), AUTO=실제/조절 시간
+  const clockHour =
+    themeMode === THEME_MODE.DARK ? 0 :
+    themeMode === THEME_MODE.LIGHT ? 12 :
+    (adjustedHour ?? currentHour);
 
   const handleClockDrag = (h: number) => {
     // 다른 모드에서 드래그하면 자동으로 AUTO 전환
-    if (!isAuto) setThemeMode(THEME_MODE.AUTO);
+    if (themeMode !== THEME_MODE.AUTO) setThemeMode(THEME_MODE.AUTO);
     setAdjustedHour(h);
   };
 
   return (
-    <div className="flex flex-col items-end gap-1.5">
-      {/* 버튼 행 */}
+    <div className="flex flex-col items-center gap-1.5">      
+      {/* 버튼 행 — 시계 아래 가운데 정렬, 소리 토글 포함 */}
       <div className="flex items-center gap-1">
         {([THEME_MODE.AUTO, THEME_MODE.DARK, THEME_MODE.LIGHT] as const).map((mode) => (
           <button
@@ -237,14 +246,10 @@ export default function ThemeToggle({
           </button>
         ))}
       </div>
-
-      {/* 아날로그 시계 — 항상 표시, 드래그하면 AUTO로 전환 */}
-      <div
-        className="flex flex-col items-center gap-0.5 transition-opacity duration-500"
-        style={{ opacity: isAuto ? 1 : 0.4 }}
-      >
+      {/* 아날로그 시계 — 맨 위, 항상 표시 */}
+      <div className="flex flex-col items-center gap-0.5">
         <ClockDial
-          hour={displayHour}
+          hour={clockHour}
           isDaytime={isDaytime}
           onDrag={handleClockDrag}
         />
@@ -252,7 +257,7 @@ export default function ThemeToggle({
           className={`tabular-nums ${isDaytime ? "text-white/60" : "text-white/35"}`}
           style={{ fontSize: "0.6rem" }}
         >
-          {formatHour(displayHour)}
+          {formatHour(clockHour)}
         </span>
       </div>
     </div>

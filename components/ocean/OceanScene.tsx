@@ -112,8 +112,9 @@ export default function OceanScene() {
         </h1>
       </div>
 
-      {/* ── UI: 우상단 설정 (테마 토글 + 소리) ── */}
-      <div className="fixed top-4 right-4 z-50 flex items-start gap-2">
+      {/* ── UI: 우상단 설정 (소리 토글 | 테마 토글) ── */}
+      <div className="fixed top-4 right-4 z-50 flex items-start gap-1">
+        <SoundToggle isDaytime={isDaytime} />
         <ThemeToggle
           themeMode={themeMode}
           setThemeMode={setThemeMode}
@@ -122,7 +123,6 @@ export default function OceanScene() {
           adjustedHour={adjustedHour}
           setAdjustedHour={setAdjustedHour}
         />
-        <SoundToggle isDaytime={isDaytime} />
       </div>
 
       {/* ── UI: 오늘 통계 (클릭 → 통계 모달) ── */}
