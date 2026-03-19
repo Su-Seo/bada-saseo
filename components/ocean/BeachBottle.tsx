@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MAX_LENGTH } from "@/lib/constants";
 import { useBeachCompose } from "./hooks/useBeachCompose";
@@ -32,9 +32,25 @@ export default function BeachBottle({
   onRemove,
 }: Props) {
   const compose = useBeachCompose();
+  const cardRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const [throwData, setThrowData] = useState<{ x: number; y: number } | null>(null);
+
+  // ── 카드 뷰포트 오버플로 보정 ──
+  useLayoutEffect(() => {
+    if (compose.state !== "writing" || !cardRef.current) return;
+    const el = cardRef.current;
+    // marginLeft 초기화 후 실제 위치 측정
+    el.style.marginLeft = "";
+    const rect = el.getBoundingClientRect();
+    const margin = 8;
+    if (rect.left < margin) {
+      el.style.marginLeft = `${margin - rect.left}px`;
+    } else if (rect.right > window.innerWidth - margin) {
+      el.style.marginLeft = `${-(rect.right - window.innerWidth + margin)}px`;
+    }
+  }, [compose.state]);
 
   // ── 드래그 ──
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -127,6 +143,7 @@ export default function BeachBottle({
           <AnimatePresence>
             {compose.state === "writing" && (
               <motion.div
+                ref={cardRef}
                 initial={{ opacity: 0, y: 10, scale: 0.92 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.92 }}
@@ -135,7 +152,7 @@ export default function BeachBottle({
                   zIndex: 38,
                   width: "16rem",
                   left: "50%",
-                  transform: `translateX(${x < 22 ? "-15%" : x > 78 ? "-85%" : "-50%"})`,
+                  transform: "translateX(-50%)",
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
