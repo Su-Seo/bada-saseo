@@ -97,6 +97,38 @@ export async function findNewBottlesSince(since: Date) {
   });
 }
 
+/** 날짜 범위별 일별 메시지 수 (통계 그래프용) */
+export async function getMessageCountByDate(from: Date, to: Date) {
+  const rows = await prisma.message.findMany({
+    where: {
+      createdAt: { gte: from, lte: to },
+      ...validMessageWhere(),
+    },
+    select: { createdAt: true },
+  });
+
+  // JS에서 날짜별 집계 (KST 기준 YYYY-MM-DD)
+  const countMap: Record<string, number> = {};
+  for (const { createdAt } of rows) {
+    const key = createdAt.toISOString().slice(0, 10);
+    countMap[key] = (countMap[key] ?? 0) + 1;
+  }
+
+  // from~to 전체 날짜 채우기 (빈 날짜 = 0)
+  const result: { date: string; count: number }[] = [];
+  const cur = new Date(from);
+  cur.setHours(0, 0, 0, 0);
+  const end = new Date(to);
+  end.setHours(23, 59, 59, 999);
+  while (cur <= end) {
+    const key = cur.toISOString().slice(0, 10);
+    result.push({ date: key, count: countMap[key] ?? 0 });
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  return result;
+}
+
 // ─── 메시지 생성/수정 ──────────────────────────────────
 
 interface CreateMessageInput {
@@ -140,20 +172,26 @@ export async function reportMessage(id: string): Promise<boolean> {
 
 // ─── 통계/정리 ──────────────────────────────────────────
 
-/** 오늘/전체 유효 메시지 수, 평균 하트 수 */
-export async function getMessageStats() {
+/** 오늘/전체 유효 메시지 수, 평균 하트 수. from/to 지정 시 해당 기간으로 필터 */
+export async function getMessageStats(from?: Date, to?: Date) {
+  const dateFilter = from || to
+    ? { createdAt: { ...(from && { gte: from }), ...(to && { lte: to }) } }
+    : {};
+
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
+  const todayFrom = from && from > todayStart ? from : todayStart;
+  const todayFilter = { createdAt: { gte: todayFrom, ...(to && { lte: to }) } };
 
   const [todayCount, totalCount, heartAgg] = await Promise.all([
     prisma.message.count({
-      where: { ...validMessageWhere(), createdAt: { gte: todayStart } },
+      where: { ...validMessageWhere(), ...todayFilter },
     }),
     prisma.message.count({
-      where: validMessageWhere(),
+      where: { ...validMessageWhere(), ...dateFilter },
     }),
     prisma.message.aggregate({
-      where: validMessageWhere(),
+      where: { ...validMessageWhere(), ...dateFilter },
       _avg: { heartCount: true },
       _sum: { heartCount: true },
     }),
@@ -167,10 +205,14 @@ export async function getMessageStats() {
   };
 }
 
-/** 유효 메시지 단어 빈도 (단어 클라우드용, 최신 500개 기준) */
-export async function getWordFrequency(limit = 60) {
+/** 유효 메시지 단어 빈도 (단어 클라우드용, 최신 500개 기준). from/to 지정 시 해당 기간으로 필터 */
+export async function getWordFrequency(limit = 60, from?: Date, to?: Date) {
+  const dateFilter = from || to
+    ? { createdAt: { ...(from && { gte: from }), ...(to && { lte: to }) } }
+    : {};
+
   const messages = await prisma.message.findMany({
-    where: validMessageWhere(),
+    where: { ...validMessageWhere(), ...dateFilter },
     select: { content: true },
     orderBy: { createdAt: "desc" },
     take: 500,
@@ -179,13 +221,17 @@ export async function getWordFrequency(limit = 60) {
   return computeWordFrequency(messages.map((m) => m.content), new Set(stopwords), limit);
 }
 
-/** 태그별 메시지 수 통계 */
-export async function getTagStats() {
+/** 태그별 메시지 수 통계. from/to 지정 시 해당 기간으로 필터 */
+export async function getTagStats(from?: Date, to?: Date) {
+  const dateFilter = from || to
+    ? { createdAt: { ...(from && { gte: from }), ...(to && { lte: to }) } }
+    : {};
+
   const [tags, grouped] = await Promise.all([
     findActiveTags(),
     prisma.message.groupBy({
       by: ["tagId"],
-      where: { ...validMessageWhere(), tagId: { not: null } },
+      where: { ...validMessageWhere(), ...dateFilter, tagId: { not: null } },
       _count: { _all: true },
     }),
   ]);

@@ -20,7 +20,7 @@ export interface StatsData {
   wordFrequency: WordEntry[];
 }
 
-export function useStats(enabled: boolean) {
+export function useStats(enabled: boolean, from: string, to: string) {
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,17 +28,18 @@ export function useStats(enabled: boolean) {
     if (!enabled) return;
     setLoading(true);
 
+    const q = from && to ? `?from=${from}&to=${to}` : "";
     Promise.all([
-      fetchJSON<Stats>("/api/stats"),
-      fetchJSON<{ stats: TagStat[] }>("/api/tags/stats"),
-      fetchJSON<{ words: WordEntry[] }>("/api/stats/words"),
+      fetchJSON<Stats>(`/api/stats${q}`),
+      fetchJSON<{ stats: TagStat[] }>(`/api/tags/stats${q}`),
+      fetchJSON<{ words: WordEntry[] }>(`/api/stats/words${q}`),
     ]).then(([stats, tagData, wordData]) => {
       if (stats && tagData && wordData) {
         setData({ stats, tagStats: tagData.stats, wordFrequency: wordData.words });
       }
       setLoading(false);
     });
-  }, [enabled]);
+  }, [enabled, from, to]);
 
   return { data, loading };
 }

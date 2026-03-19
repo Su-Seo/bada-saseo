@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { getTagStats } from "@/lib/message";
 
-export const revalidate = 60; // 1분 캐시
+export const dynamic = "force-dynamic";
 
-/** GET /api/tags/stats — 태그별 메시지 수 */
-export async function GET() {
-  const stats = await getTagStats();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const from = searchParams.get("from") ? new Date(searchParams.get("from")!) : undefined;
+  const to = searchParams.get("to") ? new Date(searchParams.get("to")!) : undefined;
 
+  const stats = await getTagStats(from, to);
   return NextResponse.json({ stats });
 }
