@@ -91,6 +91,8 @@ function CloudShape({ cloud }: { cloud: CloudData }) {
   );
 }
 
+const PLANET_TRANSITION = "opacity 1s ease, left 1s ease, top 1s ease";
+
 // ── 컴포넌트 ──────────────────────────────────────────
 
 export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
@@ -132,7 +134,7 @@ export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
               opacity: theme.moonOpacity,
               background:
                 "radial-gradient(circle, rgba(200,210,240,0.06) 0%, transparent 70%)",
-              transition: "opacity 3s ease, left 3s ease, top 3s ease",
+              transition: PLANET_TRANSITION,
             }}
           />
           <div
@@ -148,7 +150,7 @@ export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
                 "radial-gradient(circle at 35% 35%, #e8e4d8, #d4cfc0 50%, #bab5a5 80%, #a09a88)",
               boxShadow:
                 "0 0 12px rgba(220,215,195,0.35), 0 0 40px rgba(200,195,175,0.1)",
-              transition: "opacity 3s ease, left 3s ease, top 3s ease",
+              transition: PLANET_TRANSITION,
             }}
           />
         </>
@@ -197,7 +199,7 @@ export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
               opacity: theme.sunOpacity * 0.35,
               background:
                 "radial-gradient(circle, rgba(255,240,160,0.5) 0%, rgba(255,210,80,0.2) 35%, transparent 70%)",
-              transition: "opacity 3s ease, left 3s ease, top 3s ease",
+              transition: PLANET_TRANSITION,
             }}
           />
           <div
@@ -213,7 +215,7 @@ export default function OceanSky({ theme, stars, sunPos, moonPos }: Props) {
                 "radial-gradient(circle at 42% 38%, #fffde8, #ffe966 40%, #ffd020 70%, #ffb800)",
               boxShadow:
                 "0 0 18px rgba(255,220,60,0.7), 0 0 55px rgba(255,190,40,0.3)",
-              transition: "opacity 3s ease, left 3s ease, top 3s ease",
+              transition: PLANET_TRANSITION,
             }}
           />
         </>
