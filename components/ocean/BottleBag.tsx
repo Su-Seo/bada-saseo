@@ -1,6 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import {
+  getBottleBaseRgb,
+  getBottleBodyStops,
+  getBottleNeckStops,
+  getBottleEdgeColor,
+  BOTTLE_HIGHLIGHT,
+  CORK_COLOR_DAY,
+  CORK_COLOR_NIGHT,
+  type GradientStop,
+} from "@/lib/bottleTheme";
 
 export type BagType = "unhearded" | "hearted";
 
@@ -11,18 +21,57 @@ interface Props {
 }
 
 /**
- * 가로로 누운 유리병 — 프로젝트 GlassBottle 스타일 (반투명, 하이라이트)
+ * 가로로 누운 유리병 — lib/bottleTheme 공유 색상 사용
  */
-function HorizontalBottle({ x, y, rotate, glass, glassEdge, highlight, cork }: {
-  x: number; y: number; rotate: number;
-  glass: string; glassEdge: string; highlight: string; cork: string;
+function HorizontalBottle({ x, y, rotate, isDaytime, uid }: {
+  x: number; y: number; rotate: number; isDaytime: boolean; uid: string;
 }) {
+  const base = getBottleBaseRgb(null); // 기본 "초록"
+  const bodyStops = getBottleBodyStops(base);
+  const neckStops = getBottleNeckStops(base);
+  const o = isDaytime ? 1 : 0.75;
+
+  const toColor = (s: GradientStop) => `rgba(${s.r},${s.g},${s.b},${s.a * o})`;
+
   return (
     <g transform={`translate(${x},${y}) rotate(${rotate})`}>
-      <ellipse cx="0" cy="0" rx="5.5" ry="2.5" fill={glass} stroke={glassEdge} strokeWidth="0.5" />
-      <ellipse cx="-0.8" cy="-0.8" rx="3" ry="0.9" fill={highlight} opacity="0.55" />
-      <rect x="5" y="-1.2" width="3.2" height="2.4" rx="0.6" fill={glass} stroke={glassEdge} strokeWidth="0.4" />
-      <rect x="7.8" y="-1.4" width="2" height="2.8" rx="0.5" fill={cork} />
+      <defs>
+        <linearGradient id={`bb-${uid}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          {bodyStops.map((s, i) => (
+            <stop key={i} offset={s.offset} stopColor={toColor(s)} />
+          ))}
+        </linearGradient>
+        <linearGradient id={`bn-${uid}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          {neckStops.map((s, i) => (
+            <stop key={i} offset={s.offset} stopColor={toColor(s)} />
+          ))}
+        </linearGradient>
+      </defs>
+
+      {/* 몸통 */}
+      <rect x="-6" y="-2.8" width="12" height="5.6" rx="2.2" ry="2.2"
+        fill={`url(#bb-${uid})`}
+        stroke={getBottleEdgeColor(base, 0.3 * o)}
+        strokeWidth="0.4"
+      />
+      {/* 좌측 하이라이트 */}
+      <rect x="-4.5" y="-2.2" width="2.4" height="4.2" rx="1"
+        fill={BOTTLE_HIGHLIGHT}
+        opacity={0.35 * o}
+      />
+
+      {/* 넥 */}
+      <rect x="5.5" y="-1.3" width="5.5" height="2.6" rx="0.5"
+        fill={`url(#bn-${uid})`}
+        stroke={getBottleEdgeColor(base, 0.25 * o)}
+        strokeWidth="0.3"
+      />
+
+      {/* 코르크 */}
+      <rect x="10.8" y="-1.5" width="2.2" height="3" rx="0.5"
+        fill={isDaytime ? CORK_COLOR_DAY : CORK_COLOR_NIGHT}
+        opacity={o}
+      />
     </g>
   );
 }
@@ -54,12 +103,6 @@ function BagSVG({ type, isDaytime }: { type: BagType; isDaytime: boolean }) {
         heart:    isDaytime ? "rgba(154,120,64,0.65)"   : "rgba(90,72,40,0.60)",
       };
 
-  // 유리병 — 프로젝트 초록 유리 톤
-  const glass     = isDaytime ? "rgba(110,185,168,0.55)" : "rgba(70,130,110,0.45)";
-  const glassEdge = isDaytime ? "rgba(80,150,135,0.40)"  : "rgba(45,95,80,0.35)";
-  const highlight = isDaytime ? "rgba(200,240,228,0.45)" : "rgba(140,190,170,0.30)";
-  const cork      = isDaytime ? "#c4a265" : "#8a7040";
-
   return (
     <svg viewBox="0 0 72 82" width="60" height="70" aria-hidden>
       <defs>
@@ -81,6 +124,11 @@ function BagSVG({ type, isDaytime }: { type: BagType; isDaytime: boolean }) {
           <stop offset="0%"   stopColor="white" stopOpacity="0.25" />
           <stop offset="100%" stopColor="white" stopOpacity="0" />
         </linearGradient>
+        {/* 자루 내부 클립 — 몸통 + 입구 타원 */}
+        <clipPath id={`${gid}-clip`}>
+          <path d="M8,24 L4,70 Q4,78 36,78 Q68,78 68,70 L64,24 Z" />
+          <ellipse cx="36" cy="27" rx="28" ry="10" />
+        </clipPath>
       </defs>
 
       {/* ── 자루 몸통 ── */}
@@ -105,20 +153,22 @@ function BagSVG({ type, isDaytime }: { type: BagType; isDaytime: boolean }) {
       {/* 안쪽 불투명 배경 */}
       <ellipse cx="36" cy="27" rx="28" ry="10" fill={c.inside} />
 
-      {/* ── 가로로 쌓인 유리병들 ── */}
-      {/* 안쪽 층 */}
-      <HorizontalBottle x={18} y={30} rotate={3}   glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={34} y={31} rotate={-6}  glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={50} y={30} rotate={10}  glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      {/* 중간 층 */}
-      <HorizontalBottle x={14} y={26} rotate={-4}  glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={28} y={27} rotate={7}   glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={42} y={26} rotate={-2}  glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={56} y={27} rotate={9}   glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      {/* 맨 위 층 */}
-      <HorizontalBottle x={20} y={22} rotate={-8}  glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={36} y={21} rotate={5}   glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
-      <HorizontalBottle x={50} y={22} rotate={-6}  glass={glass} glassEdge={glassEdge} highlight={highlight} cork={cork} />
+      {/* ── 가로로 쌓인 유리병들 (자루 안으로 클립) ── */}
+      <g clipPath={`url(#${gid}-clip)`}>
+        {/* 안쪽 층 */}
+        <HorizontalBottle x={18} y={30} rotate={3}   isDaytime={isDaytime} uid={`${gid}-b0`} />
+        <HorizontalBottle x={34} y={31} rotate={-16}  isDaytime={isDaytime} uid={`${gid}-b1`} />
+        <HorizontalBottle x={50} y={30} rotate={180}  isDaytime={isDaytime} uid={`${gid}-b2`} />
+        {/* 중간 층 */}
+        <HorizontalBottle x={14} y={26} rotate={-14}  isDaytime={isDaytime} uid={`${gid}-b3`} />
+        <HorizontalBottle x={28} y={27} rotate={187}   isDaytime={isDaytime} uid={`${gid}-b4`} />
+        <HorizontalBottle x={42} y={26} rotate={-202}  isDaytime={isDaytime} uid={`${gid}-b5`} />
+        <HorizontalBottle x={56} y={27} rotate={189}   isDaytime={isDaytime} uid={`${gid}-b6`} />
+        {/* 맨 위 층 */}
+        <HorizontalBottle x={20} y={22} rotate={8}  isDaytime={isDaytime} uid={`${gid}-b7`} />
+        <HorizontalBottle x={36} y={21} rotate={5}   isDaytime={isDaytime} uid={`${gid}-b8`} />
+        <HorizontalBottle x={45} y={22} rotate={-196}  isDaytime={isDaytime} uid={`${gid}-b9`} />
+      </g>
 
       {/* ── 테두리 — 부드러운 림 ── */}
       <ellipse cx="36" cy="24" rx="29" ry="10" fill="none" stroke={c.rim} strokeWidth="3" />
@@ -166,7 +216,7 @@ export default function BottleBag({ type, isDaytime, onClick }: Props) {
     <motion.button
       onClick={onClick}
       className="flex flex-col items-center gap-0.5 cursor-pointer select-none"
-      whileHover={{ scale: 1.13, y: -5 }}
+      whileHover={{ scale: 1.05, y: -1 }}
       whileTap={{ scale: 0.94 }}
       transition={{ type: "spring", stiffness: 340, damping: 20 }}
       aria-label={`${label} 보기`}
