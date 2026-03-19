@@ -81,7 +81,7 @@ export function getMoonPosition(
   const x = 8 + progress * 84;
   const horizonY = HORIZON_PCT * 100 - 1;
   const peakY = 6;
-  const yOffset = 4;
+  const yOffset = 12;
   const sinVal = Math.sin(progress * Math.PI);
   const y = (horizonY + yOffset) - sinVal * (horizonY + yOffset - peakY);
   return { x, y };
