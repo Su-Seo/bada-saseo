@@ -164,11 +164,13 @@ export function useOceanTheme() {
   }, [themeMode, activeHour]);
 
   // animatedHour 기준으로 테마/그라디언트 계산 (태양·달 위치도 함께 이동)
-  const displayTheme = getThemeForHour(animatedHour);
+  // 애니메이션 중 hour가 24를 초과하거나 음수가 될 수 있으므로 정규화
+  const normalizedHour = ((animatedHour % 24) + 24) % 24;
+  const displayTheme = getThemeForHour(normalizedHour);
   const gradient = buildGradient(displayTheme, HORIZON_PCT, SHORE_PCT, BEACH_PCT);
   const waveColors = getWaveColors(displayTheme);
-  const sunPos = getSunPosition(THEME_MODE.AUTO, animatedHour);
-  const moonPos = getMoonPosition(THEME_MODE.AUTO, animatedHour);
+  const sunPos = getSunPosition(THEME_MODE.AUTO, normalizedHour);
+  const moonPos = getMoonPosition(THEME_MODE.AUTO, normalizedHour);
 
   return {
     themeMode,
