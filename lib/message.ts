@@ -166,12 +166,21 @@ interface CreateMessageInput {
   paperStyle: string | null;
 }
 
-/** 새 메시지 생성 */
+/** 새 메시지 생성 후 SSE 구독자에게 NOTIFY */
 export async function createMessage(input: CreateMessageInput) {
   const expiresAt = new Date(Date.now() + EXPIRE_DAYS * 24 * 60 * 60 * 1000);
-  await prisma.message.create({
+  const created = await prisma.message.create({
     data: { ...input, expiresAt },
+    select: { id: true, createdAt: true, bottleColor: true },
   });
+  await prisma.$executeRawUnsafe(
+    `SELECT pg_notify('new_bottle', $1)`,
+    JSON.stringify({
+      id: created.id,
+      createdAt: created.createdAt.toISOString(),
+      bottleColor: created.bottleColor ?? null,
+    })
+  );
 }
 
 /** 하트 수 1 증가 */
