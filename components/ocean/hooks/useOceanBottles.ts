@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import type { BottleData } from "../FloatingBottle";
 import { MAX_BOTTLES } from "../constants";
 import { rand, uid } from "@/lib/utils";
@@ -17,30 +17,39 @@ function createBottle(messageId: string, bottleColor?: string | null): BottleDat
   };
 }
 
+type BottleState = { bottles: BottleData[]; queue: string[] };
+type BottleAction =
+  | { type: "add"; messageId: string; bottleColor?: string | null }
+  | { type: "remove"; bottleId: string };
+
+function bottleReducer(state: BottleState, action: BottleAction): BottleState {
+  if (action.type === "add") {
+    if (state.bottles.length >= MAX_BOTTLES) {
+      return { ...state, queue: [...state.queue, action.messageId] };
+    }
+    return { ...state, bottles: [...state.bottles, createBottle(action.messageId, action.bottleColor)] };
+  }
+  if (action.type === "remove") {
+    const next = state.bottles.filter((b) => b.id !== action.bottleId);
+    if (next.length < MAX_BOTTLES && state.queue.length > 0) {
+      const [queued, ...rest] = state.queue;
+      return { bottles: [...next, createBottle(queued)], queue: rest };
+    }
+    return { ...state, bottles: next };
+  }
+  return state;
+}
+
 export function useOceanBottles() {
-  const [bottles, setBottles] = useState<BottleData[]>([]);
+  const [state, dispatch] = useReducer(bottleReducer, { bottles: [], queue: [] });
   const [todayCount, setTodayCount] = useState<number | null>(null);
-  const queueRef = useRef<string[]>([]);
 
   const addBottle = useCallback((messageId: string, bottleColor?: string | null) => {
-    setBottles((prev) => {
-      if (prev.length >= MAX_BOTTLES) {
-        queueRef.current.push(messageId);
-        return prev;
-      }
-      return [...prev, createBottle(messageId, bottleColor)];
-    });
+    dispatch({ type: "add", messageId, bottleColor });
   }, []);
 
   const removeBottle = useCallback((bottleId: string) => {
-    setBottles((prev) => {
-      const next = prev.filter((b) => b.id !== bottleId);
-      if (next.length < MAX_BOTTLES && queueRef.current.length > 0) {
-        const queued = queueRef.current.shift()!;
-        return [...next, createBottle(queued)];
-      }
-      return next;
-    });
+    dispatch({ type: "remove", bottleId });
   }, []);
 
   // ── SSE 연결 ──────────────────────────────────────
@@ -97,5 +106,11 @@ export function useOceanBottles() {
     });
   }, []);
 
-  return { bottles, addBottle, removeBottle, todayCount };
+  return {
+    bottles: state.bottles,
+    addBottle,
+    removeBottle,
+    todayCount,
+    pendingCount: state.bottles.length + state.queue.length,
+  };
 }

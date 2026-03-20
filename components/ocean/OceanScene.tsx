@@ -27,8 +27,8 @@ export default function OceanScene() {
   const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, animatedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
   const { horizonY, shoreY } = useViewport();
   const stars = useStars();
-  const { bottles, removeBottle, todayCount } = useOceanBottles();
-  const bagCounts = useBagCounts();
+  const { bottles, removeBottle, todayCount, pendingCount } = useOceanBottles();
+  const { unhearted, hearted, refresh: refreshBagCounts } = useBagCounts();
   const { beachBottles, handleBeachThrow, handleBeachRemove } = useBeachBottles();
 
   const [throwOpen, setThrowOpen] = useState(false);
@@ -96,13 +96,13 @@ export default function OceanScene() {
         <BottleBag
           type="unhearted"
           isDaytime={isDaytime}
-          bottleCount={bagCounts.unhearted}
+          bottleCount={unhearted}
           onClick={() => setTodayBagOpen("unhearted")}
         />
         <BottleBag
           type="hearted"
           isDaytime={isDaytime}
-          bottleCount={bagCounts.hearted}
+          bottleCount={hearted}
           onClick={() => setTodayBagOpen("hearted")}
         />
       </div>
@@ -194,7 +194,11 @@ export default function OceanScene() {
       <AnimatePresence>
         {throwOpen && <ThrowModal key="throw" onClose={() => setThrowOpen(false)} />}
         {pickMessageId && (
-          <PickModal key="pick" messageId={pickMessageId} onClose={() => setPickMessageId(null)} />
+          <PickModal
+            key="pick"
+            messageId={pickMessageId}
+            onClose={() => { setPickMessageId(null); refreshBagCounts(pendingCount); }}
+          />
         )}
         {statsOpen && <StatsModal key="stats" onClose={() => setStatsOpen(false)} />}
         {todayBagOpen && (

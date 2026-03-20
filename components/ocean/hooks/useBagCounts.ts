@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchTodayBagCounts } from "@/lib/api";
 
 interface BagCounts {
@@ -11,11 +11,18 @@ interface BagCounts {
 export function useBagCounts() {
   const [counts, setCounts] = useState<BagCounts>({ unhearted: 0, hearted: 0 });
 
-  useEffect(() => {
+  const refresh = useCallback((pendingAdjustment = 0) => {
     fetchTodayBagCounts().then((data) => {
-      if (data) setCounts(data);
+      if (data) setCounts({
+        unhearted: Math.max(0, data.unhearted - pendingAdjustment),
+        hearted: data.hearted,
+      });
     });
   }, []);
 
-  return counts;
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { ...counts, refresh };
 }
