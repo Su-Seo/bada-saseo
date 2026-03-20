@@ -1,29 +1,19 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useCallback } from "react";
+import { AnimatePresence } from "framer-motion";
 import FloatingBottle from "./FloatingBottle";
-import ThrowModal from "./ThrowModal";
-import PickModal from "./PickModal";
-import GlassBottle from "./GlassBottle";
 import OceanSky from "./OceanSky";
 import OceanWaves from "./OceanWaves";
 import OceanBeach from "./OceanBeach";
 import { useOceanTheme } from "./hooks/useOceanTheme";
-import { getTextClasses } from "@/lib/oceanTheme";
 import { useViewport } from "./hooks/useViewport";
 import { useStars } from "./hooks/useStars";
 import { useOceanBottles } from "./hooks/useOceanBottles";
 import { useBeachBottles } from "./hooks/useBeachBottles";
-import SoundToggle from "@/components/SoundToggle";
-import ThemeToggle from "./ThemeToggle";
-import StatsModal from "./StatsModal";
-import BottleBag, { type BagType } from "./BottleBag";
-import TodayBottlesModal from "./TodayBottlesModal";
 import { useBagCounts } from "./hooks/useBagCounts";
-import { BEACH_PCT } from "./constants";
-
-const BOTTLE_BAG_POSITION_CHANGE_HEIGHT = 500;
+import { useOceanUI } from "./hooks/useOceanUI";
+import OceanUI from "./OceanUI";
 
 export default function OceanScene() {
   const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, animatedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
@@ -32,25 +22,17 @@ export default function OceanScene() {
   const { bottles, removeBottle, todayCount, pendingCount } = useOceanBottles();
   const { unhearted, hearted, refresh: refreshBagCounts } = useBagCounts();
   const { beachBottles, handleBeachThrow, handleBeachRemove } = useBeachBottles();
-
-  const [throwOpen, setThrowOpen] = useState(false);
-  const [pickMessageId, setPickMessageId] = useState<string | null>(null);
-  const [statsOpen, setStatsOpen] = useState(false);
-  const [todayBagOpen, setTodayBagOpen] = useState<BagType | null>(null);
+  const { throwOpen, setThrowOpen, pickMessageId, setPickMessageId, statsOpen, setStatsOpen, todayBagOpen, setTodayBagOpen } = useOceanUI();
 
   const isDaytime = theme.sunOpacity > 0.5;
-  const txt = getTextClasses(isDaytime);
 
   const handleBottleClick = useCallback(
     ({ messageId, bottleId }: { messageId: string; bottleId: string }) => {
       removeBottle(bottleId);
       setPickMessageId(messageId);
     },
-    [removeBottle]
+    [removeBottle, setPickMessageId]
   );
-
-  // 보자기 위치 조정 여부 결정 (뷰포트 높이가 특정 값보다 작으면 보자기를 모래사장 왼쪽 상단으로 이동)
-  const shouldChangeBagPosition = viewH < BOTTLE_BAG_POSITION_CHANGE_HEIGHT;
 
   return (
     <div
@@ -91,132 +73,33 @@ export default function OceanScene() {
         horizonY={horizonY}
         onBeachThrow={handleBeachThrow}
         onBeachRemove={handleBeachRemove}
+        isDaytime={isDaytime}
+        viewH={viewH}
+        unhearted={unhearted}
+        hearted={hearted}
+        onTodayBagOpen={(type) => setTodayBagOpen(type)}
       />
 
-      {/* ── UI: 보자기 (모래사장 왼쪽 상단) ── */}
-      <div
-        className={`fixed z-[28] flex items-end ${shouldChangeBagPosition ? "flex-row gap-2" : "flex-col"}`}
-        style={shouldChangeBagPosition
-          ? { left: "3%", bottom: "8px" }
-          : { left: "3%", top: `calc(${BEACH_PCT * 100}% + 10px)` }}
-      >
-        <BottleBag
-          type="unhearted"
-          isDaytime={isDaytime}
-          bottleCount={unhearted}
-          onClick={() => setTodayBagOpen("unhearted")}
-        />
-        <BottleBag
-          type="hearted"
-          isDaytime={isDaytime}
-          bottleCount={hearted}
-          onClick={() => setTodayBagOpen("hearted")}
-        />
-      </div>
-
-      {/* ── UI: 던지기 버튼 ── */}
-      <button
-        className={`fixed right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1.5 py-3 px-2.5 rounded-2xl backdrop-blur-sm border transition-all active:scale-95 ${
-          isDaytime
-            ? "bg-black/15 border-black/3 text-white/90 hover:bg-black/25"
-            : "bg-white/8 border-white/15 text-white/60 hover:bg-white/15 hover:text-white/90"
-        }`}
-        onClick={() => setThrowOpen(true)}
-        aria-label="고민 던지기"
-        title="고민 던지기"
-      >
-        <GlassBottle size={1.4} />
-        <span
-          className={isDaytime ? "text-white/90 tracking-wider" : "text-white/50 tracking-wider"}
-          style={{ fontSize: "0.55rem", writingMode: "vertical-rl" }}
-        >
-          던지기
-        </span>
-      </button>
-
-      {/* ── UI: 타이틀 ── */}
-      <div className="absolute top-5 left-5 z-40 pointer-events-none">
-        <h1
-          className={`font-light tracking-[0.45em] ${txt.dim}`}
-          style={{ fontSize: "0.75rem" }}
-        >
-          바다사서
-        </h1>
-      </div>
-
-      {/* ── UI: 우상단 설정 (소리 토글 | 테마 토글) ── */}
-      <div className="fixed top-4 right-4 z-50 flex items-start gap-1">
-        <SoundToggle isDaytime={isDaytime} />
-        <ThemeToggle
-          themeMode={themeMode}
-          setThemeMode={setThemeMode}
-          isDaytime={isDaytime}
-          currentHour={currentHour}
-          adjustedHour={adjustedHour}
-          setAdjustedHour={setAdjustedHour}
-          animatedHour={animatedHour}
-        />
-      </div>
-
-      {/* ── UI: 오늘 통계 (클릭 → 통계 모달) ── */}
-      {todayCount !== null && (
-        <button
-          className={`fixed bottom-5 right-5 z-40 text-right px-2.5 py-1.5 rounded-xl transition-all active:scale-95 ${
-            isDaytime ? "bg-black/25 backdrop-blur-sm hover:bg-black/35" : "hover:bg-white/8"
-          }`}
-          onClick={() => setStatsOpen(true)}
-          aria-label="통계 보기"
-        >
-          <p className={`${txt.faint} tracking-wider`} style={{ fontSize: "0.65rem" }}>
-            오늘 바다에 던져진 마음
-          </p>
-          <p
-            className={`${txt.mid} font-light tabular-nums`}
-            style={{ fontSize: "1.1rem", lineHeight: 1.2 }}
-          >
-            {todayCount.toLocaleString()}개
-          </p>
-        </button>
-      )}
-
-      {/* ── UI: 빈 바다 안내 ── */}
-      <AnimatePresence>
-        {bottles.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ delay: 4, duration: 2 }}
-            className={`absolute z-20 text-center pointer-events-none px-3 py-1.5 rounded-xl transition-colors`}
-            style={{ top: "52%", left: "50%", transform: "translate(-50%, -50%)" }}
-          >
-            <p className={`${txt.faint} tracking-widest`} style={{ fontSize: "0.7rem" }}>
-              아직 바다가 고요해요...
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── 모달 ── */}
-      <AnimatePresence>
-        {throwOpen && <ThrowModal key="throw" onClose={() => setThrowOpen(false)} />}
-        {pickMessageId && (
-          <PickModal
-            key="pick"
-            messageId={pickMessageId}
-            onClose={() => { setPickMessageId(null); refreshBagCounts(pendingCount); }}
-          />
-        )}
-        {statsOpen && <StatsModal key="stats" onClose={() => setStatsOpen(false)} />}
-        {todayBagOpen && (
-          <TodayBottlesModal
-            key={`bag-${todayBagOpen}`}
-            type={todayBagOpen}
-            onClose={() => setTodayBagOpen(null)}
-            onPickMessage={(id) => setPickMessageId(id)}
-          />
-        )}
-      </AnimatePresence>
+      {/* UI 오버레이 */}
+      <OceanUI
+        isDaytime={isDaytime}
+        bottlesEmpty={bottles.length === 0}
+        todayCount={todayCount}
+        pendingCount={pendingCount}
+        refreshBagCounts={refreshBagCounts}
+        themeToggleProps={{ themeMode, setThemeMode, isDaytime, currentHour, adjustedHour, setAdjustedHour, animatedHour }}
+        throwOpen={throwOpen}
+        onThrowOpen={() => setThrowOpen(true)}
+        onThrowClose={() => setThrowOpen(false)}
+        pickMessageId={pickMessageId}
+        onPickClose={() => setPickMessageId(null)}
+        onPickMessage={(id) => setPickMessageId(id)}
+        statsOpen={statsOpen}
+        onStatsOpen={() => setStatsOpen(true)}
+        onStatsClose={() => setStatsOpen(false)}
+        todayBagOpen={todayBagOpen}
+        onTodayBagClose={() => setTodayBagOpen(null)}
+      />
     </div>
   );
 }

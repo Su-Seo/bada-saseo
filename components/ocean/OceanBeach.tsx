@@ -4,7 +4,10 @@ import { AnimatePresence } from "framer-motion";
 import type { OceanTheme } from "@/lib/oceanTheme";
 import BeachBottle from "./BeachBottle";
 import type { BeachBottleItem } from "./hooks/useBeachBottles";
+import BottleBag, { type BagType } from "./BottleBag";
 import { BEACH_PCT } from "./constants";
+
+const BOTTLE_BAG_POSITION_CHANGE_HEIGHT = 500;
 
 const SHELLS = [
   { x: 9,  yOff: 1.8, type: "fan",    rot: -22, s: 1.0 },
@@ -24,6 +27,11 @@ interface Props {
   horizonY: number;
   onBeachThrow: (id: string) => void;
   onBeachRemove: (id: string) => void;
+  isDaytime: boolean;
+  viewH: number;
+  unhearted: number;
+  hearted: number;
+  onTodayBagOpen: (type: BagType) => void;
 }
 
 export default function OceanBeach({
@@ -33,7 +41,13 @@ export default function OceanBeach({
   horizonY,
   onBeachThrow,
   onBeachRemove,
+  isDaytime,
+  viewH,
+  unhearted,
+  hearted,
+  onTodayBagOpen,
 }: Props) {
+  const shouldChangeBagPosition = viewH < BOTTLE_BAG_POSITION_CHANGE_HEIGHT;
   return (
     <>
       {/* ── 젖은 모래 ── */}
@@ -127,6 +141,27 @@ export default function OceanBeach({
           />
         ))}
       </AnimatePresence>
+
+      {/* ── 보자기 ── */}
+      <div
+        className={`fixed z-[28] flex items-end ${shouldChangeBagPosition ? "flex-row gap-2" : "flex-col"}`}
+        style={shouldChangeBagPosition
+          ? { left: "3%", bottom: "8px" }
+          : { left: "3%", top: `calc(${BEACH_PCT * 100}% + 10px)` }}
+      >
+        <BottleBag
+          type="unhearted"
+          isDaytime={isDaytime}
+          bottleCount={unhearted}
+          onClick={() => onTodayBagOpen("unhearted")}
+        />
+        <BottleBag
+          type="hearted"
+          isDaytime={isDaytime}
+          bottleCount={hearted}
+          onClick={() => onTodayBagOpen("hearted")}
+        />
+      </div>
     </>
   );
 }
