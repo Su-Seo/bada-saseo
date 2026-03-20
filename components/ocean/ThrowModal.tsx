@@ -17,6 +17,7 @@ export default function ThrowModal({ onClose, onThrowSuccess }: Props) {
 
   const onThrow = async () => {
     const result = await handleThrow();
+    console.log("[throw] result:", result, "onThrowSuccess:", !!onThrowSuccess);
     if (result) {
       onThrowSuccess?.(result.messageId, result.bottleColor);
       setTimeout(complete, 1600);
