@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     // Prisma 자동생성 파일
     "app/generated/**",
   ]),
+
 ]);
 
 export default eslintConfig;

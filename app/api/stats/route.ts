@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { getMessageStats } from "@/lib/message";
+import { parseDateRange } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const fromParam = searchParams.get("from");
-  const toParam = searchParams.get("to");
-  const from = fromParam ? new Date(fromParam) : undefined;
-  const to = toParam ? new Date(toParam + "T23:59:59.999") : undefined;
+  const range = parseDateRange(new URL(req.url).searchParams);
+  if (!range.ok) return NextResponse.json({ error: range.error }, { status: 400 });
 
-  const stats = await getMessageStats(from, to);
+  const stats = await getMessageStats(range.from ?? undefined, range.to ?? undefined);
   return NextResponse.json(stats);
 }

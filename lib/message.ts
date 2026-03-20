@@ -173,14 +173,12 @@ export async function createMessage(input: CreateMessageInput) {
     data: { ...input, expiresAt },
     select: { id: true, createdAt: true, bottleColor: true },
   });
-  await prisma.$executeRawUnsafe(
-    `SELECT pg_notify('new_bottle', $1)`,
-    JSON.stringify({
-      id: created.id,
-      createdAt: created.createdAt.toISOString(),
-      bottleColor: created.bottleColor ?? null,
-    })
-  );
+  const payload = JSON.stringify({
+    id: created.id,
+    createdAt: created.createdAt.toISOString(),
+    bottleColor: created.bottleColor ?? null,
+  });
+  await prisma.$executeRaw`SELECT pg_notify('new_bottle', ${payload})`;
 }
 
 /** 하트 수 1 증가 */

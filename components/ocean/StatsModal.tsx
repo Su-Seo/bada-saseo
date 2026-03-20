@@ -6,6 +6,7 @@ import TagChart from "@/components/stats/TagChart";
 import WordCloud from "@/components/stats/WordCloud";
 import DailyChart from "@/components/stats/DailyChart";
 import { useStats } from "./hooks/useStats";
+import { toDateStr, nextDay } from "@/lib/utils";
 
 interface Props {
   onClose: () => void;
@@ -16,10 +17,6 @@ const PRESETS = [
   { label: "7일", days: 7 },
   { label: "30일", days: 30 },
 ];
-
-function toDateStr(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -44,7 +41,7 @@ export default function StatsModal({ onClose }: Props) {
     d.setDate(d.getDate() - (preset - 1));
     return toDateStr(d);
   })();
-  const toDate = isCustom && customTo ? customTo : today;
+  const toDate = nextDay(isCustom && customTo ? customTo : today);
 
   const { data, loading } = useStats(true, fromDate, toDate);
 

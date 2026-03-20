@@ -7,7 +7,12 @@ export const maxDuration = 30;
 
 export async function GET(req: NextRequest) {
   const sinceParam = req.nextUrl.searchParams.get("since");
-  const since = sinceParam ? new Date(sinceParam) : new Date();
+  const parsed = sinceParam ? new Date(sinceParam) : new Date();
+  // 최대 24시간 과거까지만 허용 (Invalid Date 및 너무 오래된 값 방어)
+  const MAX_LOOKBACK_MS = 24 * 60 * 60 * 1000;
+  const since = isNaN(parsed.getTime()) || Date.now() - parsed.getTime() > MAX_LOOKBACK_MS
+    ? new Date(Date.now() - MAX_LOOKBACK_MS)
+    : parsed;
 
   const encoder = new TextEncoder();
   let client: Client | null = null;
