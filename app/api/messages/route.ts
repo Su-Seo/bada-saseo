@@ -44,7 +44,10 @@ export async function POST(req: NextRequest) {
       ? body.paperStyle
       : null;
 
-  await createMessage({ content, tagId, bottleColor, paperStyle });
+  const created = await createMessage({ content, tagId, bottleColor, paperStyle });
 
-  return NextResponse.json({ success: true }, { status: 201 });
+  return NextResponse.json(
+    { success: true, messageId: created.id, bottleColor: created.bottleColor },
+    { status: 201 }
+  );
 }

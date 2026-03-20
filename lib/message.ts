@@ -179,6 +179,7 @@ export async function createMessage(input: CreateMessageInput) {
     bottleColor: created.bottleColor ?? null,
   });
   await prisma.$executeRaw`SELECT pg_notify('new_bottle', ${payload})`;
+  return { id: created.id, bottleColor: created.bottleColor };
 }
 
 /** 하트 수 1 증가 */

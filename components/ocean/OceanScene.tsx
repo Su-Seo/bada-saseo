@@ -19,7 +19,7 @@ export default function OceanScene() {
   const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, animatedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
   const { viewH, horizonY, shoreY } = useViewport();
   const stars = useStars();
-  const { bottles, removeBottle, todayCount, pendingCount } = useOceanBottles();
+  const { bottles, removeBottle, addMyBottle, todayCount, pendingCount } = useOceanBottles();
   const { unhearted, hearted, refresh: refreshBagCounts } = useBagCounts();
   const { beachBottles, handleBeachRemove } = useBeachBottles();
   const {
@@ -95,6 +95,7 @@ export default function OceanScene() {
         throwOpen={throwOpen}
         onThrowOpen={openThrow}
         onThrowClose={closeThrow}
+      onThrowSuccess={addMyBottle}
         pickMessageId={pickMessageId}
         onPickClose={closePick}
         onPickMessage={openPick}

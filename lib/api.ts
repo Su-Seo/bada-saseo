@@ -28,7 +28,7 @@ export function fetchTodayBagCounts() {
 export async function postMessage(
   content: string,
   options: ComposeOptions
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; messageId?: string; bottleColor?: string | null; error?: string }> {
   const res = await fetch("/api/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -40,5 +40,6 @@ export async function postMessage(
     return { ok: false, error: (data as { error?: string }).error ?? "오류가 발생했습니다." };
   }
 
-  return { ok: true };
+  const data = await res.json().catch(() => ({})) as { messageId?: string; bottleColor?: string | null };
+  return { ok: true, messageId: data.messageId, bottleColor: data.bottleColor ?? null };
 }

@@ -14,23 +14,23 @@ export function useThrowMessage() {
   const [stage, setStage] = useState<Stage>("write");
   const [error, setError] = useState("");
 
-  /** 검증 → API 호출 → "throwing" 단계 진입. 성공 여부를 반환 */
-  const handleThrow = async (): Promise<boolean> => {
+  /** 검증 → API 호출 → "throwing" 단계 진입. 성공 시 { messageId, bottleColor } 반환, 실패 시 null */
+  const handleThrow = async (): Promise<{ messageId: string; bottleColor: string | null } | null> => {
     const validation = validateMessageContent(content);
     if (!validation.ok) {
       setError(validation.error);
-      return false;
+      return null;
     }
     setError("");
 
     const result = await postMessage(content, options);
     if (!result.ok) {
       setError(result.error ?? "오류가 발생했습니다.");
-      return false;
+      return null;
     }
 
     setStage("throwing");
-    return true;
+    return { messageId: result.messageId ?? "", bottleColor: result.bottleColor ?? null };
   };
 
   const complete = () => setStage("done");

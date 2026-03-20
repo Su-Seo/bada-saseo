@@ -23,6 +23,7 @@ interface OceanUIProps {
   throwOpen: boolean;
   onThrowOpen: () => void;
   onThrowClose: () => void;
+  onThrowSuccess: (messageId: string, bottleColor: string | null) => void;
   pickMessageId: string | null;
   onPickClose: () => void;
   onPickMessage: (id: string) => void;
@@ -43,6 +44,7 @@ export default function OceanUI({
   throwOpen,
   onThrowOpen,
   onThrowClose,
+  onThrowSuccess,
   pickMessageId,
   onPickClose,
   onPickMessage,
@@ -133,7 +135,7 @@ export default function OceanUI({
 
       {/* ── 모달 ── */}
       <AnimatePresence>
-        {throwOpen && <ThrowModal key="throw" onClose={onThrowClose} />}
+        {throwOpen && <ThrowModal key="throw" onClose={onThrowClose} onThrowSuccess={onThrowSuccess} />}
         {pickMessageId && (
           <PickModal
             key="pick"
