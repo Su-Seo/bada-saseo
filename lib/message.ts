@@ -178,7 +178,7 @@ export async function createMessage(input: CreateMessageInput) {
     createdAt: created.createdAt.toISOString(),
     bottleColor: created.bottleColor ?? null,
   });
-  await prisma.$executeRaw`SELECT pg_notify('new_bottle', ${payload})`;
+  prisma.$executeRaw`SELECT pg_notify('new_bottle', ${payload})`;
   return { id: created.id, bottleColor: created.bottleColor };
 }
 
