@@ -9,7 +9,7 @@ interface Props extends MessageData {
   onClose: () => void;
 }
 
-export default function MessageCard({ id, content, tag, paperStyle, heartCount, onClose }: Props) {
+export default function MessageCard({ id, content, tag, paperStyle, heartCount }: Props) {
   const paperBg = PAPER_STYLE_MAP[(paperStyle as PaperStyle) ?? "기본"]?.note ?? PAPER_STYLE_MAP["기본"].note;
   const [hearted, setHearted] = useState(false);
   const [reported, setReported] = useState(false);

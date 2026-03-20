@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useSyncExternalStore } from "react";
 
 export function ClockDial({
   hour,
@@ -18,8 +18,7 @@ export function ClockDial({
   const svgRef = useRef<SVGSVGElement>(null);
   const dragging = useRef(false);
   // SSR에서 trigonometric 부동소수점 serialization mismatch 방지 — 클라이언트에서만 렌더링
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   // 진짜 시계처럼 12h 원형 좌표 (12 = 상단, 시계방향)
   const toXY = (h12: number, radius: number) => {

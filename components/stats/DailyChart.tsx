@@ -29,9 +29,12 @@ export default function DailyChart({ from, to }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     const q = from && to ? `?from=${from}&to=${to}` : "";
-    fetchJSON<{ data: DayData[] }>(`/api/stats/daily${q}`)
+    Promise.resolve()
+      .then(() => {
+        setLoading(true);
+        return fetchJSON<{ data: DayData[] }>(`/api/stats/daily${q}`);
+      })
       .then((res) => { if (res?.data) setData(res.data); })
       .finally(() => setLoading(false));
   }, [from, to]);

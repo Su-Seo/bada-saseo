@@ -24,19 +24,22 @@ export function useStats(enabled: boolean, from: string, to: string) {
 
   useEffect(() => {
     if (!enabled) return;
-    setLoading(true);
-
     const q = from && to ? `?from=${from}&to=${to}` : "";
-    Promise.all([
-      fetchJSON<Stats>(`/api/stats${q}`),
-      fetchJSON<{ stats: TagStat[] }>(`/api/tags/stats${q}`),
-      fetchJSON<{ words: WordEntry[] }>(`/api/stats/words${q}`),
-    ]).then(([stats, tagData, wordData]) => {
-      if (stats && tagData && wordData) {
-        setData({ stats, tagStats: tagData.stats, wordFrequency: wordData.words });
-      }
-      setLoading(false);
-    });
+    Promise.resolve()
+      .then(() => {
+        setLoading(true);
+        return Promise.all([
+          fetchJSON<Stats>(`/api/stats${q}`),
+          fetchJSON<{ stats: TagStat[] }>(`/api/tags/stats${q}`),
+          fetchJSON<{ words: WordEntry[] }>(`/api/stats/words${q}`),
+        ]);
+      })
+      .then(([stats, tagData, wordData]) => {
+        if (stats && tagData && wordData) {
+          setData({ stats, tagStats: tagData.stats, wordFrequency: wordData.words });
+        }
+        setLoading(false);
+      });
   }, [enabled, from, to]);
 
   return { data, loading };

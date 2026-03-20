@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { playBreakingBottle } from "@/lib/sounds";
 import { SPLASH_DELAY_MS } from "./constants";
@@ -29,16 +29,16 @@ const SHARDS = [
 ];
 
 export default function BeachBreakAnimation({ throwX, throwY, errorMessage, onComplete }: Props) {
-  const [isPlayingSound, setIsPlayingSound] = useState(false);
+  const soundPlayedRef = useRef(false);
 
   useEffect(() => {
-    if (!isPlayingSound) {
+    if (!soundPlayedRef.current) {
+      soundPlayedRef.current = true;
       playBreakingBottle();
-      setIsPlayingSound(true);
     }
     const t = setTimeout(onComplete, SPLASH_DELAY_MS + 500);
     return () => clearTimeout(t);
-  }, [onComplete, isPlayingSound]);
+  }, [onComplete]);
 
   return (
     <div className="fixed inset-0 z-[85] pointer-events-none">

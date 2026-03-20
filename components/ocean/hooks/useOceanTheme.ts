@@ -120,14 +120,21 @@ export function useOceanTheme() {
     const targetHour = getTargetHour(themeMode, activeHour);
 
     if (!isModeChange) {
-      // 시계 드래그 또는 실시간 tick: 즉시 반영
+      // 시계 드래그 또는 실시간 tick: 즉시 반영 (RAF로 effect 외부에서 setState 호출)
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
       }
       animatedHourRef.current = targetHour;
-      setAnimatedHour(targetHour);
-      return;
+      rafRef.current = requestAnimationFrame(() => {
+        setAnimatedHour(animatedHourRef.current);
+        rafRef.current = null;
+      });
+      return () => {
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
+      };
     }
 
     // 테마 모드 변경: 시간이 흘러가는 애니메이션

@@ -24,8 +24,6 @@ export default function ThemeToggle({
   themeMode,
   setThemeMode,
   isDaytime,
-  currentHour,
-  adjustedHour,
   setAdjustedHour,
   animatedHour,
 }: Props) {
