@@ -21,17 +21,22 @@ export default function OceanScene() {
   const stars = useStars();
   const { bottles, removeBottle, todayCount, pendingCount } = useOceanBottles();
   const { unhearted, hearted, refresh: refreshBagCounts } = useBagCounts();
-  const { beachBottles, handleBeachThrow, handleBeachRemove } = useBeachBottles();
-  const { throwOpen, setThrowOpen, pickMessageId, setPickMessageId, statsOpen, setStatsOpen, todayBagOpen, setTodayBagOpen } = useOceanUI();
+  const { beachBottles, handleBeachRemove } = useBeachBottles();
+  const {
+    throwOpen, openThrow, closeThrow,
+    pickMessageId, openPick, closePick,
+    statsOpen, openStats, closeStats,
+    todayBagOpen, openTodayBag, closeTodayBag,
+  } = useOceanUI();
 
   const isDaytime = theme.sunOpacity > 0.5;
 
   const handleBottleClick = useCallback(
     ({ messageId, bottleId }: { messageId: string; bottleId: string }) => {
       removeBottle(bottleId);
-      setPickMessageId(messageId);
+      openPick(messageId);
     },
-    [removeBottle, setPickMessageId]
+    [removeBottle, openPick]
   );
 
   return (
@@ -71,13 +76,12 @@ export default function OceanScene() {
         beachBottles={beachBottles}
         shoreY={shoreY}
         horizonY={horizonY}
-        onBeachThrow={handleBeachThrow}
         onBeachRemove={handleBeachRemove}
         isDaytime={isDaytime}
         viewH={viewH}
         unhearted={unhearted}
         hearted={hearted}
-        onTodayBagOpen={(type) => setTodayBagOpen(type)}
+        onTodayBagOpen={openTodayBag}
       />
 
       {/* UI 오버레이 */}
@@ -89,16 +93,16 @@ export default function OceanScene() {
         refreshBagCounts={refreshBagCounts}
         themeToggleProps={{ themeMode, setThemeMode, isDaytime, currentHour, adjustedHour, setAdjustedHour, animatedHour }}
         throwOpen={throwOpen}
-        onThrowOpen={() => setThrowOpen(true)}
-        onThrowClose={() => setThrowOpen(false)}
+        onThrowOpen={openThrow}
+        onThrowClose={closeThrow}
         pickMessageId={pickMessageId}
-        onPickClose={() => setPickMessageId(null)}
-        onPickMessage={(id) => setPickMessageId(id)}
+        onPickClose={closePick}
+        onPickMessage={openPick}
         statsOpen={statsOpen}
-        onStatsOpen={() => setStatsOpen(true)}
-        onStatsClose={() => setStatsOpen(false)}
+        onStatsOpen={openStats}
+        onStatsClose={closeStats}
         todayBagOpen={todayBagOpen}
-        onTodayBagClose={() => setTodayBagOpen(null)}
+        onTodayBagClose={closeTodayBag}
       />
     </div>
   );

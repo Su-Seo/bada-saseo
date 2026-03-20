@@ -25,7 +25,6 @@ interface Props {
   beachBottles: BeachBottleItem[];
   shoreY: number;
   horizonY: number;
-  onBeachThrow: (id: string) => void;
   onBeachRemove: (id: string) => void;
   isDaytime: boolean;
   viewH: number;
@@ -39,7 +38,6 @@ export default function OceanBeach({
   beachBottles,
   shoreY,
   horizonY,
-  onBeachThrow,
   onBeachRemove,
   isDaytime,
   viewH,
@@ -136,7 +134,6 @@ export default function OceanBeach({
             rotation={bb.rotation}
             shoreY={shoreY}
             horizonY={horizonY}
-            onThrow={onBeachThrow}
             onRemove={onBeachRemove}
           />
         ))}

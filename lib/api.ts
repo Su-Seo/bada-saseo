@@ -8,7 +8,8 @@ export async function fetchJSON<T>(url: string): Promise<T | null> {
     const res = await fetch(url);
     if (!res.ok) return null;
     return await res.json();
-  } catch {
+  } catch (err) {
+    console.error(`[fetchJSON] ${url}`, err);
     return null;
   }
 }

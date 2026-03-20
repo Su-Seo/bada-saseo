@@ -16,8 +16,6 @@ interface Props {
   rotation: number;
   shoreY: number;
   horizonY: number;
-  /** 던지기 완료 후 병 제거를 부모에 알림 */
-  onThrow: (id: string) => void;
   onRemove: (id: string) => void;
 }
 
@@ -28,7 +26,6 @@ export default function BeachBottle({
   rotation,
   shoreY,
   horizonY,
-  onThrow,
   onRemove,
 }: Props) {
   const compose = useBeachCompose();
@@ -74,7 +71,7 @@ export default function BeachBottle({
       setThrowData({ x: e.clientX, y: e.clientY });
       const ok = await compose.submit();
       if (!ok) return; // throwData 유지 — broken 상태에서 BeachBreakAnimation이 사용
-      onThrow(id);
+
     } else {
       setDragPos(null);
     }

@@ -39,12 +39,9 @@ export function useBeachBottles() {
     return () => clearInterval(timer);
   }, []);
 
-  // BeachBottle이 직접 API 호출 — 여기선 제거만
-  const handleBeachThrow = useCallback((_bottleId: string) => {}, []);
-
   const handleBeachRemove = useCallback((bottleId: string) => {
     setBeachBottles((prev) => prev.filter((b) => b.id !== bottleId));
   }, []);
 
-  return { beachBottles, handleBeachThrow, handleBeachRemove };
+  return { beachBottles, handleBeachRemove };
 }
