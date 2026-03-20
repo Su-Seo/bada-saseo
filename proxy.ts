@@ -35,7 +35,7 @@ const RATE_LIMIT_RULES: RateLimitRule[] = [
   { method: "POST", match: (p) => p.endsWith("/report"),  key: "report", limit: 10, windowMs: 60 * 60 * 1000 },
 ];
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // ── 관리자 라우트 인증 ────────────────────────────────────
