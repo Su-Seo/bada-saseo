@@ -23,9 +23,11 @@ import TodayBottlesModal from "./TodayBottlesModal";
 import { useBagCounts } from "./hooks/useBagCounts";
 import { BEACH_PCT } from "./constants";
 
+const BOTTLE_BAG_POSITION_CHANGE_HEIGHT = 500;
+
 export default function OceanScene() {
   const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, animatedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
-  const { horizonY, shoreY } = useViewport();
+  const { viewH, horizonY, shoreY } = useViewport();
   const stars = useStars();
   const { bottles, removeBottle, todayCount, pendingCount } = useOceanBottles();
   const { unhearted, hearted, refresh: refreshBagCounts } = useBagCounts();
@@ -46,6 +48,9 @@ export default function OceanScene() {
     },
     [removeBottle]
   );
+
+  // 보자기 위치 조정 여부 결정 (뷰포트 높이가 특정 값보다 작으면 보자기를 모래사장 왼쪽 상단으로 이동)
+  const shouldChangeBagPosition = viewH < BOTTLE_BAG_POSITION_CHANGE_HEIGHT;
 
   return (
     <div
@@ -90,8 +95,10 @@ export default function OceanScene() {
 
       {/* ── UI: 보자기 (모래사장 왼쪽 상단) ── */}
       <div
-        className="fixed z-[28] flex flex-col items-start"
-        style={{ left: "3%", top: `calc(${BEACH_PCT * 100}% + 10px)` }}
+        className={`fixed z-[28] flex items-end ${shouldChangeBagPosition ? "flex-row gap-2" : "flex-col"}`}
+        style={shouldChangeBagPosition
+          ? { left: "3%", bottom: "8px" }
+          : { left: "3%", top: `calc(${BEACH_PCT * 100}% + 10px)` }}
       >
         <BottleBag
           type="unhearted"
