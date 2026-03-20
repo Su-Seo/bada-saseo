@@ -95,7 +95,7 @@ export default function OceanScene() {
         throwOpen={throwOpen}
         onThrowOpen={openThrow}
         onThrowClose={closeThrow}
-      onThrowSuccess={addMyBottle}
+        onThrowSuccess={addMyBottle}
         pickMessageId={pickMessageId}
         onPickClose={closePick}
         onPickMessage={openPick}
