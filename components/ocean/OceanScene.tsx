@@ -14,6 +14,7 @@ import { useBeachBottles } from "./hooks/useBeachBottles";
 import { useBagCounts } from "./hooks/useBagCounts";
 import { useOceanUI } from "./hooks/useOceanUI";
 import OceanUI from "./OceanUI";
+import { OceanBottlesProvider } from "./OceanBottlesContext";
 
 export default function OceanScene() {
   const { themeMode, setThemeMode, currentHour, adjustedHour, setAdjustedHour, animatedHour, theme, gradient, waveColors, sunPos, moonPos } = useOceanTheme();
@@ -40,71 +41,72 @@ export default function OceanScene() {
   );
 
   return (
-    <div
-      className="fixed inset-0 overflow-hidden"
-      style={{ background: `rgb(${theme.skyTop.join(",")})` }}
-    >
-      {/* 레이어 1: 그라디언트 배경 (CSS transition 제거 — JS RAF로 직접 애니메이션) */}
+    <OceanBottlesProvider value={{ addMyBottle }}>
       <div
-        className="absolute inset-0"
-        style={{ background: gradient }}
-      />
+        className="fixed inset-0 overflow-hidden"
+        style={{ background: `rgb(${theme.skyTop.join(",")})` }}
+      >
+        {/* 레이어 1: 그라디언트 배경 (CSS transition 제거 — JS RAF로 직접 애니메이션) */}
+        <div
+          className="absolute inset-0"
+          style={{ background: gradient }}
+        />
 
-      {/* 레이어 2-5: 하늘 (별, 달, 태양, 수평선 발광) */}
-      <OceanSky theme={theme} stars={stars} sunPos={sunPos} moonPos={moonPos} />
+        {/* 레이어 2-5: 하늘 (별, 달, 태양, 수평선 발광) */}
+        <OceanSky theme={theme} stars={stars} sunPos={sunPos} moonPos={moonPos} />
 
-      {/* 레이어 5a-6b: 바다 파도 */}
-      <OceanWaves theme={theme} waveColors={waveColors} sunPos={sunPos} />
+        {/* 레이어 5a-6b: 바다 파도 */}
+        <OceanWaves theme={theme} waveColors={waveColors} sunPos={sunPos} />
 
-      {/* 레이어 5c: 표류 중인 유리병들 */}
-      <AnimatePresence>
-        {bottles.map((bottle) => (
-          <FloatingBottle
-            key={bottle.id}
-            bottle={bottle}
-            horizonY={horizonY}
-            shoreY={shoreY}
-            onClick={handleBottleClick}
-            onExpire={(id) => { removeBottle(id); refreshBagCounts(pendingCount - 1); }}
-          />
-        ))}
-      </AnimatePresence>
+        {/* 레이어 5c: 표류 중인 유리병들 */}
+        <AnimatePresence>
+          {bottles.map((bottle) => (
+            <FloatingBottle
+              key={bottle.id}
+              bottle={bottle}
+              horizonY={horizonY}
+              shoreY={shoreY}
+              onClick={handleBottleClick}
+              onExpire={(id) => { removeBottle(id); refreshBagCounts(pendingCount - 1); }}
+            />
+          ))}
+        </AnimatePresence>
 
-      {/* 레이어 6c-7: 해변 (모래, 조개, 해변 병) */}
-      <OceanBeach
-        theme={theme}
-        beachBottles={beachBottles}
-        shoreY={shoreY}
-        horizonY={horizonY}
-        onBeachRemove={handleBeachRemove}
-        isDaytime={isDaytime}
-        viewH={viewH}
-        unhearted={unhearted}
-        hearted={hearted}
-        onTodayBagOpen={openTodayBag}
-      />
+        {/* 레이어 6c-7: 해변 (모래, 조개, 해변 병) */}
+        <OceanBeach
+          theme={theme}
+          beachBottles={beachBottles}
+          shoreY={shoreY}
+          horizonY={horizonY}
+          onBeachRemove={handleBeachRemove}
+          isDaytime={isDaytime}
+          viewH={viewH}
+          unhearted={unhearted}
+          hearted={hearted}
+          onTodayBagOpen={openTodayBag}
+        />
 
-      {/* UI 오버레이 */}
-      <OceanUI
-        isDaytime={isDaytime}
-        bottlesEmpty={bottles.length === 0}
-        todayCount={todayCount}
-        pendingCount={pendingCount}
-        refreshBagCounts={refreshBagCounts}
-        themeToggleProps={{ themeMode, setThemeMode, isDaytime, currentHour, adjustedHour, setAdjustedHour, animatedHour }}
-        throwOpen={throwOpen}
-        onThrowOpen={openThrow}
-        onThrowClose={closeThrow}
-        onThrowSuccess={addMyBottle}
-        pickMessageId={pickMessageId}
-        onPickClose={closePick}
-        onPickMessage={openPick}
-        statsOpen={statsOpen}
-        onStatsOpen={openStats}
-        onStatsClose={closeStats}
-        todayBagOpen={todayBagOpen}
-        onTodayBagClose={closeTodayBag}
-      />
-    </div>
+        {/* UI 오버레이 */}
+        <OceanUI
+          isDaytime={isDaytime}
+          bottlesEmpty={bottles.length === 0}
+          todayCount={todayCount}
+          pendingCount={pendingCount}
+          refreshBagCounts={refreshBagCounts}
+          themeToggleProps={{ themeMode, setThemeMode, isDaytime, currentHour, adjustedHour, setAdjustedHour, animatedHour }}
+          throwOpen={throwOpen}
+          onThrowOpen={openThrow}
+          onThrowClose={closeThrow}
+          pickMessageId={pickMessageId}
+          onPickClose={closePick}
+          onPickMessage={openPick}
+          statsOpen={statsOpen}
+          onStatsOpen={openStats}
+          onStatsClose={closeStats}
+          todayBagOpen={todayBagOpen}
+          onTodayBagClose={closeTodayBag}
+        />
+      </div>
+    </OceanBottlesProvider>
   );
 }

@@ -8,20 +8,14 @@ import { useThrowMessage } from "./hooks/useThrowMessage";
 
 interface Props {
   onClose: () => void;
-  onThrowSuccess?: (messageId: string, bottleColor: string | null) => void;
 }
 
-export default function ThrowModal({ onClose, onThrowSuccess }: Props) {
+export default function ThrowModal({ onClose }: Props) {
   const { content, setContent, options, setOptions, stage, error, handleThrow, complete, reset } =
     useThrowMessage();
-
   const onThrow = async () => {
-    const result = await handleThrow();
-    console.log("[throw] result:", result, "onThrowSuccess:", !!onThrowSuccess);
-    if (result) {
-      onThrowSuccess?.(result.messageId, result.bottleColor);
-      setTimeout(complete, 1600);
-    }
+    const ok = await handleThrow();
+    if (ok) setTimeout(complete, 1600);
   };
 
   return (

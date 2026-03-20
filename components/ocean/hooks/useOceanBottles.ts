@@ -43,23 +43,23 @@ function bottleReducer(state: BottleState, action: BottleAction): BottleState {
 export function useOceanBottles() {
   const [state, dispatch] = useReducer(bottleReducer, { bottles: [], queue: [] });
   const [todayCount, setTodayCount] = useState<number | null>(null);
-  // 낙관적으로 추가한 messageId 추적 — SSE 중복 방지용
-  const myBottleIds = useRef(new Set<string>());
+  // 이미 추가된 messageId 통합 추적 — 낙관적 업데이트와 SSE 순서 무관하게 한 번만 처리
+  const addedBottleIds = useRef(new Set<string>());
 
-  const addBottle = useCallback((messageId: string, bottleColor?: string | null) => {
+  /** 내부 통합 추가 함수 — 먼저 도착한 쪽(낙관적/SSE)이 처리, 나중 도착은 무시 */
+  const addBottleOnce = useCallback((messageId: string, bottleColor: string | null) => {
+    if (addedBottleIds.current.has(messageId)) return;
+    addedBottleIds.current.add(messageId);
     dispatch({ type: "add", messageId, bottleColor });
+    setTodayCount((n) => (n !== null ? n + 1 : 1));
   }, []);
 
   const removeBottle = useCallback((bottleId: string) => {
     dispatch({ type: "remove", bottleId });
   }, []);
 
-  /** 내가 던진 병: 즉시 UI 업데이트 + SSE 중복 방지 등록 */
-  const addMyBottle = useCallback((messageId: string, bottleColor: string | null) => {
-    myBottleIds.current.add(messageId);
-    dispatch({ type: "add", messageId, bottleColor });
-    setTodayCount((n) => (n !== null ? n + 1 : 1));
-  }, []);
+  /** 낙관적 업데이트 — 내가 던진 병 즉시 반영 */
+  const addMyBottle = addBottleOnce;
 
   // ── SSE 연결 ──────────────────────────────────────
   useEffect(() => {
@@ -83,13 +83,7 @@ export function useOceanBottles() {
 
         if (data.type === "bottle" && data.messageId) {
           if (data.createdAt) since = data.createdAt;
-          // 낙관적으로 이미 추가한 내 병은 중복 추가 방지
-          if (myBottleIds.current.has(data.messageId)) {
-            myBottleIds.current.delete(data.messageId);
-          } else {
-            addBottle(data.messageId, data.bottleColor);
-            setTodayCount((n) => (n !== null ? n + 1 : 1));
-          }
+          addBottleOnce(data.messageId, data.bottleColor ?? null);
         }
 
         if (data.type === "reconnect") {
@@ -111,7 +105,7 @@ export function useOceanBottles() {
       es?.close();
       clearTimeout(reconnectTimer);
     };
-  }, [addBottle]);
+  }, [addBottleOnce]);
 
   // ── 오늘 통계 로드 ────────────────────────────────
   useEffect(() => {
@@ -121,10 +115,9 @@ export function useOceanBottles() {
   }, []);
 
   return {
-    bottles: state.bottles,
-    addBottle,
     addMyBottle,
     removeBottle,
+    bottles: state.bottles,
     todayCount,
     pendingCount: state.bottles.length + state.queue.length,
   };

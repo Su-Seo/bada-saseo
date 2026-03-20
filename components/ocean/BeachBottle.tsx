@@ -29,6 +29,7 @@ export default function BeachBottle({
   onRemove,
 }: Props) {
   const compose = useBeachCompose();
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);

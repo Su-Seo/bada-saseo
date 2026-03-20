@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { postMessage } from "@/lib/api";
 import { validateMessageContent } from "@/lib/validation";
 import { DEFAULT_COMPOSE_OPTIONS } from "@/lib/types";
 import type { ComposeOptions } from "@/lib/types";
 import { SPLASH_DELAY_MS } from "@/components/ocean/constants";
+import { useSubmitBottle } from "../OceanBottlesContext";
 
 type State = "empty" | "writing" | "filled" | "throwing" | "broken";
 
@@ -15,6 +15,7 @@ export function useBeachCompose() {
   const [options, setOptions] = useState<ComposeOptions>(DEFAULT_COMPOSE_OPTIONS);
   const [error, setError] = useState("");
   const [breakError, setBreakError] = useState("");
+  const submitBottle = useSubmitBottle();
 
   const open = () => {
     if (state === "empty") setState("writing");
@@ -46,11 +47,11 @@ export function useBeachCompose() {
     setState("empty");
   };
 
-  /** 던지기 실행 — 에러 시 false 반환 + 에러 상태 설정 */
+  /** 던지기 실행 — 낙관적 업데이트 포함. 에러 시 false 반환 */
   const submit = async (): Promise<boolean> => {
     setState("throwing");
     const [result] = await Promise.all([
-      postMessage(content, options),
+      submitBottle(content, options),
       new Promise((r) => setTimeout(r, SPLASH_DELAY_MS - 150)), // 최소 비행 시간 보장
     ]);
     if (!result.ok) {
