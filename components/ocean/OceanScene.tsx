@@ -78,7 +78,7 @@ export default function OceanScene() {
             horizonY={horizonY}
             shoreY={shoreY}
             onClick={handleBottleClick}
-            onExpire={removeBottle}
+            onExpire={(id) => { removeBottle(id); refreshBagCounts(pendingCount - 1); }}
           />
         ))}
       </AnimatePresence>
