@@ -21,6 +21,7 @@ export default function OceanScene() {
   const { viewH, horizonY, shoreY } = useViewport();
   const stars = useStars();
   const { bottles, removeBottle, addMyBottle, todayCount, pendingCount } = useOceanBottles();
+  const floatingMessageIds = new Set(bottles.map((b) => b.messageId));
   const { unhearted, hearted, refresh: refreshBagCounts } = useBagCounts();
   const { beachBottles, handleBeachRemove } = useBeachBottles();
   const {
@@ -105,6 +106,7 @@ export default function OceanScene() {
           onStatsClose={closeStats}
           todayBagOpen={todayBagOpen}
           onTodayBagClose={closeTodayBag}
+          floatingMessageIds={floatingMessageIds}
         />
       </div>
     </OceanBottlesProvider>

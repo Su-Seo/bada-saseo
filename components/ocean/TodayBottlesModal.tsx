@@ -10,6 +10,7 @@ interface Props {
   type: BagType;
   onClose: () => void;
   onPickMessage: (id: string) => void;
+  floatingMessageIds: Set<string>;
 }
 
 function formatTime(createdAt: string): string {
@@ -50,7 +51,7 @@ function BottleListItem({ msg, onPick }: { msg: TodayBottleItem; onPick: () => v
   );
 }
 
-export default function TodayBottlesModal({ type, onClose, onPickMessage }: Props) {
+export default function TodayBottlesModal({ type, onClose, onPickMessage, floatingMessageIds }: Props) {
   const { messages, loading, error, fetchMessages, reset } = useTodayBottles();
 
   useEffect(() => {
@@ -63,6 +64,8 @@ export default function TodayBottlesModal({ type, onClose, onPickMessage }: Prop
     type === "hearted"
       ? "아직 공감받은 유리병이 없어요"
       : "오늘 던져진 유리병이 없어요";
+
+  const visibleMessages = messages?.filter((msg) => !floatingMessageIds.has(msg.id)) ?? null;
 
   return (
     <motion.div
@@ -109,15 +112,15 @@ export default function TodayBottlesModal({ type, onClose, onPickMessage }: Prop
             <p className="text-white/50 text-xs text-center py-8 px-4">{error}</p>
           )}
 
-          {!loading && !error && messages?.length === 0 && (
+          {!loading && !error && visibleMessages?.length === 0 && (
             <p className="text-white/40 text-xs text-center py-8 tracking-wider px-4">
               {emptyMsg}
             </p>
           )}
 
-          {messages && messages.length > 0 && (
+          {visibleMessages && visibleMessages.length > 0 && (
             <ul className="divide-y divide-white/5">
-              {messages.map((msg) => (
+              {visibleMessages.map((msg) => (
                 <BottleListItem
                   key={msg.id}
                   msg={msg}

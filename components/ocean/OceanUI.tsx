@@ -31,6 +31,7 @@ interface OceanUIProps {
   onStatsClose: () => void;
   todayBagOpen: BagType | null;
   onTodayBagClose: () => void;
+  floatingMessageIds: Set<string>;
 }
 
 export default function OceanUI({
@@ -51,6 +52,7 @@ export default function OceanUI({
   onStatsClose,
   todayBagOpen,
   onTodayBagClose,
+  floatingMessageIds,
 }: OceanUIProps) {
   const txt = getTextClasses(isDaytime);
 
@@ -148,6 +150,7 @@ export default function OceanUI({
             type={todayBagOpen}
             onClose={onTodayBagClose}
             onPickMessage={onPickMessage}
+            floatingMessageIds={floatingMessageIds}
           />
         )}
       </AnimatePresence>
