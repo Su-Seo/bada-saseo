@@ -8,52 +8,26 @@ import GlassBottle from "./GlassBottle";
 import SoundToggle from "@/components/SoundToggle";
 import ThemeToggle from "./ThemeToggle";
 import StatsModal from "./StatsModal";
-import { type BagType } from "./BottleBag";
 import TodayBottlesModal from "./TodayBottlesModal";
 import { getTextClasses } from "@/lib/oceanTheme";
+import { useOceanUIContext } from "./OceanUIContext";
 
 interface OceanUIProps {
   isDaytime: boolean;
   bottlesEmpty: boolean;
   todayCount: number | null;
-  pendingCount: number;
-  refreshBagCounts: (count: number) => void;
   themeToggleProps: ComponentProps<typeof ThemeToggle>;
-  // 모달 상태
-  throwOpen: boolean;
-  onThrowOpen: () => void;
-  onThrowClose: () => void;
-  pickMessageId: string | null;
-  onPickClose: () => void;
-  onPickMessage: (id: string) => void;
-  statsOpen: boolean;
-  onStatsOpen: () => void;
-  onStatsClose: () => void;
-  todayBagOpen: BagType | null;
-  onTodayBagClose: () => void;
-  floatingMessageIds: Set<string>;
 }
 
-export default function OceanUI({
-  isDaytime,
-  bottlesEmpty,
-  todayCount,
-  pendingCount,
-  refreshBagCounts,
-  themeToggleProps,
-  throwOpen,
-  onThrowOpen,
-  onThrowClose,
-  pickMessageId,
-  onPickClose,
-  onPickMessage,
-  statsOpen,
-  onStatsOpen,
-  onStatsClose,
-  todayBagOpen,
-  onTodayBagClose,
-  floatingMessageIds,
-}: OceanUIProps) {
+export default function OceanUI({ isDaytime, bottlesEmpty, todayCount, themeToggleProps }: OceanUIProps) {
+  const {
+    throwOpen, openThrow, closeThrow,
+    pickMessageId, openPick, closePick,
+    statsOpen, openStats, closeStats,
+    todayBagOpen, closeTodayBag,
+    pendingCount, refreshBagCounts,
+  } = useOceanUIContext();
+
   const txt = getTextClasses(isDaytime);
 
   return (
@@ -65,7 +39,7 @@ export default function OceanUI({
             ? "bg-black/15 border-black/3 text-white/90 hover:bg-black/25"
             : "bg-white/8 border-white/15 text-white/60 hover:bg-white/15 hover:text-white/90"
         }`}
-        onClick={onThrowOpen}
+        onClick={openThrow}
         aria-label="고민 던지기"
         title="고민 던지기"
       >
@@ -100,7 +74,7 @@ export default function OceanUI({
           className={`fixed bottom-5 right-5 z-40 text-right px-2.5 py-1.5 rounded-xl transition-all active:scale-95 ${
             isDaytime ? "bg-black/25 backdrop-blur-sm hover:bg-black/35" : "hover:bg-white/8"
           }`}
-          onClick={onStatsOpen}
+          onClick={openStats}
           aria-label="통계 보기"
         >
           <p className={`${txt.faint} tracking-wider`} style={{ fontSize: "0.65rem" }}>
@@ -135,22 +109,21 @@ export default function OceanUI({
 
       {/* ── 모달 ── */}
       <AnimatePresence>
-        {throwOpen && <ThrowModal key="throw" onClose={onThrowClose} />}
+        {throwOpen && <ThrowModal key="throw" onClose={closeThrow} />}
         {pickMessageId && (
           <PickModal
             key="pick"
             messageId={pickMessageId}
-            onClose={() => { onPickClose(); refreshBagCounts(pendingCount); }}
+            onClose={() => { closePick(); refreshBagCounts(pendingCount); }}
           />
         )}
-        {statsOpen && <StatsModal key="stats" onClose={onStatsClose} />}
+        {statsOpen && <StatsModal key="stats" onClose={closeStats} />}
         {todayBagOpen && (
           <TodayBottlesModal
             key={`bag-${todayBagOpen}`}
             type={todayBagOpen}
-            onClose={onTodayBagClose}
-            onPickMessage={onPickMessage}
-            floatingMessageIds={floatingMessageIds}
+            onClose={closeTodayBag}
+            onPickMessage={openPick}
           />
         )}
       </AnimatePresence>

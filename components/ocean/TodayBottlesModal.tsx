@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import GlassBottle from "./GlassBottle";
 import { useTodayBottles, type TodayBottleItem } from "./hooks/useTodayBottles";
 import type { BagType } from "./BottleBag";
+import { useOceanUIContext } from "./OceanUIContext";
 
 interface Props {
   type: BagType;
   onClose: () => void;
   onPickMessage: (id: string) => void;
-  floatingMessageIds: Set<string>;
 }
 
 function formatTime(createdAt: string): string {
@@ -51,8 +51,9 @@ function BottleListItem({ msg, onPick }: { msg: TodayBottleItem; onPick: () => v
   );
 }
 
-export default function TodayBottlesModal({ type, onClose, onPickMessage, floatingMessageIds }: Props) {
+export default function TodayBottlesModal({ type, onClose, onPickMessage }: Props) {
   const { messages, loading, error, fetchMessages, reset } = useTodayBottles();
+  const { floatingMessageIds } = useOceanUIContext();
 
   useEffect(() => {
     fetchMessages(type === "hearted");

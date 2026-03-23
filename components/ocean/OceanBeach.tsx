@@ -4,8 +4,9 @@ import { AnimatePresence } from "framer-motion";
 import type { OceanTheme } from "@/lib/oceanTheme";
 import BeachBottle from "./BeachBottle";
 import type { BeachBottleItem } from "./hooks/useBeachBottles";
-import BottleBag, { type BagType } from "./BottleBag";
+import BottleBag from "./BottleBag";
 import { BEACH_PCT } from "./constants";
+import { useOceanUIContext } from "./OceanUIContext";
 
 const BOTTLE_BAG_POSITION_CHANGE_HEIGHT = 500;
 
@@ -28,9 +29,6 @@ interface Props {
   onBeachRemove: (id: string) => void;
   isDaytime: boolean;
   viewH: number;
-  unhearted: number;
-  hearted: number;
-  onTodayBagOpen: (type: BagType) => void;
 }
 
 export default function OceanBeach({
@@ -41,10 +39,8 @@ export default function OceanBeach({
   onBeachRemove,
   isDaytime,
   viewH,
-  unhearted,
-  hearted,
-  onTodayBagOpen,
 }: Props) {
+  const { unhearted, hearted, openTodayBag } = useOceanUIContext();
   const shouldChangeBagPosition = viewH < BOTTLE_BAG_POSITION_CHANGE_HEIGHT;
   return (
     <>
@@ -150,13 +146,13 @@ export default function OceanBeach({
           type="unhearted"
           isDaytime={isDaytime}
           bottleCount={unhearted}
-          onClick={() => onTodayBagOpen("unhearted")}
+          onClick={() => openTodayBag("unhearted")}
         />
         <BottleBag
           type="hearted"
           isDaytime={isDaytime}
           bottleCount={hearted}
-          onClick={() => onTodayBagOpen("hearted")}
+          onClick={() => openTodayBag("hearted")}
         />
       </div>
     </>
